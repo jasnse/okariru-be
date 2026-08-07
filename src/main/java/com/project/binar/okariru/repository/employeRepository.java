@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface employeRepository extends JpaRepository<employeEntity, Integer> {
     Optional<employeEntity> findByUserName(String name);
+    Optional<employeEntity> findById(Integer id);
 }
