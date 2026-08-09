@@ -18,4 +18,17 @@ public class roleResponse {
         String nama_role;
         LocalDate created_at;
     }
+
+    @Setter
+    @Getter
+    public static class roleDeleteResponse {
+        String Message;
+        String status;
+    }
+
+    @Setter
+    @Getter
+    public static class roleUpdateResponse{
+        String Message;
+    }
 }
