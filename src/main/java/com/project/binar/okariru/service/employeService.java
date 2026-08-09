@@ -7,6 +7,10 @@ import com.project.binar.okariru.repository.employeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +21,20 @@ import java.util.Optional;
 public class employeService {
 
     private final employeRepository employeRepository;
+
+    //Pagination
+    public Page<employeResponse.employeGetResponse> findAll(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+
+        Page<employeEntity> employeePage = employeRepository.searchEmployees(keyword, pageable);
+
+        return employeePage.map(employee -> new employeResponse.employeGetResponse(
+                employee.getEmployeeId(),
+                employee.getUserName(),
+                employee.getNip(),
+                employee.getJoinedDate()
+        ));
+    }
 
     //getAll Employee
     public List<employeResponse.employeGetResponse> getAllEmployeeService() {
