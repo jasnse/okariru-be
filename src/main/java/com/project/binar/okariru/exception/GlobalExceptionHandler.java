@@ -9,9 +9,11 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-@ControllerAdvice
+//@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     //validasi @Valid gagal
@@ -48,7 +50,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-    //tipe data field di JSON body gak sesuai (misal angka diisi teks) / JSON malformed
+    // JSON malformed
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<String> handleBodyNotReadable(HttpMessageNotReadableException e) {
         return ResponseEntity.badRequest().body("Format request body tidak valid, cek kembali tipe data yang dikirim");

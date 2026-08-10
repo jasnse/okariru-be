@@ -6,31 +6,30 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-public class rolegroupResponse {
+public class pinjamanResponse {
 
     @Setter
     @Getter
     @AllArgsConstructor
-    public static class getRoleGroupResponse{
-        Integer roleGroupId;
-        Integer roleId;
-        Integer employeeId;
-        String namaGroupRole;
+    public static class getPinjamanResponse {
+        Integer pinjamanId;
+        String jenisPinjaman;
+        String deskripsiPinjaman;
+        Double bunga;
+        Double biayaLainnya;
         LocalDate createdAt;
         LocalDate updatedAt;
     }
 
     @Setter
     @Getter
-    public static class roleGroupUpdateResponse{
+    public static class pinjamanUpdateResponse {
         String Message;
     }
-
 
     @Setter
     @Getter
-    public static class roleGroupDeleteResponse{
+    public static class pinjamanDeleteResponse {
         String Message;
     }
-
 }

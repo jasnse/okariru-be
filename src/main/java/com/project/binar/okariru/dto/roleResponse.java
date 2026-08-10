@@ -17,6 +17,7 @@ public class roleResponse {
         Integer role_id;
         String nama_role;
         LocalDate created_at;
+        LocalDate updated_at;
     }
 
     @Setter

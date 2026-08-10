@@ -1,0 +1,115 @@
+package com.project.binar.okariru.service.impl;
+
+import com.project.binar.okariru.dto.employeRequest;
+import com.project.binar.okariru.dto.employeResponse;
+import com.project.binar.okariru.entity.employeEntity;
+import com.project.binar.okariru.repository.employeRepository;
+import com.project.binar.okariru.service.employeService;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class employeServiceImpl implements employeService {
+
+    private final employeRepository employeRepository;
+
+    @Override
+    public Page<employeResponse.employeGetResponse> findAll(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+
+        Page<employeEntity> employeePage = employeRepository.searchEmployees(keyword, pageable);
+
+        return employeePage.map(employee -> new employeResponse.employeGetResponse(
+                employee.getEmployeeId(),
+                employee.getUserName(),
+                employee.getNip(),
+                employee.getJoinedDate(),
+                employee.getUpdatedAt()
+        ));
+    }
+
+    @Override
+    //getAll Employee
+    public List<employeResponse.employeGetResponse> getAllEmployeeService() {
+        return employeRepository.findAll()
+                .stream()
+                .map(employe -> new employeResponse.employeGetResponse(
+                        employe.getEmployeeId(),
+                        employe.getUserName(),
+                        employe.getNip(),
+                        employe.getJoinedDate(),
+                        employe.getUpdatedAt()
+                ))
+                .toList();
+    }
+
+    @Override
+    //get employee by username
+    public employeResponse.employeGetResponse getEmployeeServiceUserName(String name) {
+        employeEntity employe = employeRepository.findByUserName(name)
+                .orElseThrow(() -> new EntityNotFoundException("Employee dengan username " + name + " tidak ditemukan"));
+        return new employeResponse.employeGetResponse (
+                employe.getEmployeeId(),
+                employe.getUserName(),
+                employe.getNip(),
+                employe.getJoinedDate(),
+                employe.getUpdatedAt()
+        );
+
+    }
+    @Override
+    //add Employe
+    public employeResponse.employeAddResponse addEmploye(employeRequest.employeAddRequest addRequest){
+        employeEntity employe = new employeEntity();
+        employe.setUserName(addRequest.username);
+        employe.setEmail(addRequest.email);
+        employe.setPassword(addRequest.password);
+        employe.setNip(addRequest.nip);
+        employe.setJoinedDate(LocalDate.now());
+
+        employeEntity saved = employeRepository.save(employe);
+        return new employeResponse.employeAddResponse(
+                saved.getEmployeeId(),
+                saved.getUserName(),
+                saved.getNip(),
+                saved.getJoinedDate());
+    }
+
+    //update employee by id
+    @Override
+    @Transactional
+    public void updateEmployeEmailPass(Integer id, String email, String password){
+        Optional<employeEntity> employeeOpt = employeRepository.findById(id);
+
+        if (employeeOpt.isEmpty()) {
+            throw new EntityNotFoundException("Employee id tidak ditemukan");
+        }
+
+        employeEntity employeeUpdate = employeeOpt.get();
+        employeeUpdate.setEmail(email);
+        employeeUpdate.setPassword(password);
+        employeeUpdate.setUpdatedAt(LocalDate.now());
+        employeRepository.save(employeeUpdate);
+    }
+
+    //delete Employe by ID
+    @Override
+    public String deleteEmployee(Integer id) {
+        employeEntity employe = employeRepository.findById(id)
+                .orElseThrow(()-> new EntityNotFoundException("Employee id: " + id + " " + "tidak ditemukan" ));
+        employeRepository.delete(employe);
+
+        return "Employee dengan ID: " + id + " " + "Telah di hapus";
+    }
+}

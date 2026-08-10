@@ -16,6 +16,7 @@ public class menuResponse {
         String namaMenu;
         String deskripsiMenu;
         LocalDate created_at;
+        LocalDate updated_at;
     }
 
     @Setter
