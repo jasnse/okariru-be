@@ -31,10 +31,35 @@ public class roleGroupController {
         return ResponseEntity.ok(rolegroupService.getRoleById(roleGID));
     }
 
-    //add role
+    //add role group
     @PostMapping
     public ResponseEntity<rolegroupResponse.getRoleGroupResponse> addRoleGroup(
             @Valid @RequestBody rolegroupRequest.roleGroupAddRequest roleGroupadd) {
         return ResponseEntity.ok(rolegroupService.addRoleGroup(roleGroupadd));
     }
+
+    //Update Role group
+    @PutMapping
+    public ResponseEntity<rolegroupResponse.roleGroupUpdateResponse> updateRole(
+            @RequestParam Integer id,
+            @Valid
+            @RequestBody rolegroupRequest.roleGroupUpdateRequest roleGUpdate
+    ) {
+        rolegroupService.updateRoleGroup(id, roleGUpdate.roleId, roleGUpdate.employeeId, roleGUpdate.namaGroupRole);
+
+        rolegroupResponse.roleGroupUpdateResponse respUpdate = new rolegroupResponse.roleGroupUpdateResponse();
+        respUpdate.setMessage("Role Berhasil di update");
+        return ResponseEntity.ok(respUpdate);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<rolegroupResponse.roleGroupDeleteResponse> deleteRoleGroup(
+            @Valid @RequestParam Integer Id) {
+        rolegroupService.deleteRoleGroup(Id);
+
+        rolegroupResponse.roleGroupDeleteResponse respDelete = new rolegroupResponse.roleGroupDeleteResponse();
+        respDelete.setMessage("Delete role Group successfully");
+        return ResponseEntity.ok(respDelete);
+    }
+
 }

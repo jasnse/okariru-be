@@ -19,7 +19,10 @@ public class employeRequest {
     }
 
     public static class employeChangeCredentialRequest{
+        @NotBlank(message = "email harus terisi")
          public String email;
+        @NotBlank(message = "password harus terisi")
          public String password;
+        public LocalDate updatedDate;
     }
 }

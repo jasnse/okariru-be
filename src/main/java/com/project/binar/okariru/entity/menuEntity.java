@@ -28,4 +28,7 @@ public class menuEntity {
 
     @Column(name = "created_at")
     private LocalDate createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDate updatedAt;
 }

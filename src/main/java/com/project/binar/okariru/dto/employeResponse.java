@@ -1,5 +1,6 @@
 package com.project.binar.okariru.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -12,13 +13,24 @@ public class employeResponse {
             Integer Id,
             String userName,
             String nip,
-            LocalDate joinedDate
+            LocalDate joinedDate,
+            LocalDate updatedDate
     ) {}
 
     @Setter
     @Getter
     public static class employeUpdateResponse{
         String Message;
+    }
+
+    @Setter
+    @Getter
+    @AllArgsConstructor
+    public static class employeAddResponse{
+        Integer Id;
+        String userName;
+        String nip;
+        LocalDate joinedDate;
     }
 
     @Setter

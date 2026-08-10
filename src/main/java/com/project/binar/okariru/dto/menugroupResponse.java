@@ -6,31 +6,29 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-public class rolegroupResponse {
+public class menugroupResponse {
 
     @Setter
     @Getter
     @AllArgsConstructor
-    public static class getRoleGroupResponse{
+    public static class getMenuGroupResponse {
+        Integer menuGroupId;
+        Integer menuId;
         Integer roleGroupId;
-        Integer roleId;
-        Integer employeeId;
-        String namaGroupRole;
+        String namaGroupMenu;
         LocalDate createdAt;
         LocalDate updatedAt;
     }
 
     @Setter
     @Getter
-    public static class roleGroupUpdateResponse{
+    public static class menuGroupUpdateResponse {
         String Message;
     }
-
 
     @Setter
     @Getter
-    public static class roleGroupDeleteResponse{
+    public static class menuGroupDeleteResponse {
         String Message;
     }
-
 }
