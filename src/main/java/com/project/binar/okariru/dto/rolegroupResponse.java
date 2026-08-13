@@ -6,7 +6,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-public class rolegroupResponse {
+public class RolegroupResponse {
 
     @Setter
     @Getter

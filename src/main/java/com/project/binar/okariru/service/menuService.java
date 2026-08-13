@@ -1,17 +1,17 @@
 package com.project.binar.okariru.service;
 
-import com.project.binar.okariru.dto.menuRequest;
-import com.project.binar.okariru.dto.menuResponse;
+import com.project.binar.okariru.dto.MenuRequest;
+import com.project.binar.okariru.dto.MenuResponse;
 
 import java.util.List;
 
-public interface menuService {
+public interface MenuService {
 
-    List<menuResponse.getMenuResponse> getAllmenuService();
+    List<MenuResponse.getMenuResponse> getAllmenuService();
 
-    menuResponse.getMenuResponse getmenuById(Integer idmenu);
+    MenuResponse.getMenuResponse getmenuById(Integer idmenu);
 
-    menuResponse.getMenuResponse addMenu(menuRequest.menuAddRequest addRequest);
+    MenuResponse.getMenuResponse addMenu(MenuRequest.menuAddRequest addRequest);
 
     void updatemenu(Integer id, String namamenu, String deskripsimenu);
 

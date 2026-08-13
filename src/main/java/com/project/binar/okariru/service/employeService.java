@@ -1,9 +1,9 @@
 package com.project.binar.okariru.service;
 
-import com.project.binar.okariru.dto.employeRequest;
-import com.project.binar.okariru.dto.employeResponse;
-import com.project.binar.okariru.entity.employeEntity;
-import com.project.binar.okariru.repository.employeRepository;
+import com.project.binar.okariru.dto.EmployeRequest;
+import com.project.binar.okariru.dto.EmployeResponse;
+import com.project.binar.okariru.entity.EmployeEntity;
+import com.project.binar.okariru.repository.EmployeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,15 +18,15 @@ import java.util.List;
 import java.util.Optional;
 
 
-public interface employeService {
+public interface EmployeService {
 
-    Page<employeResponse.employeGetResponse> findAll(String keyword, int page, int size);
+    Page<EmployeResponse.employeGetResponse> findAll(String keyword, int page, int size);
 
-    List<employeResponse.employeGetResponse> getAllEmployeeService();
+    List<EmployeResponse.employeGetResponse> getAllEmployeeService();
 
-    employeResponse.employeGetResponse getEmployeeServiceUserName(String name);
+    EmployeResponse.employeGetResponse getEmployeeServiceUserName(String name);
 
-    employeResponse.employeAddResponse addEmploye(employeRequest.employeAddRequest addRequest);
+    EmployeResponse.employeAddResponse addEmploye(EmployeRequest.employeAddRequest addRequest);
 
     void updateEmployeEmailPass(Integer id, String email, String password);
 

@@ -1,17 +1,17 @@
 package com.project.binar.okariru.service;
 
-import com.project.binar.okariru.dto.roleRequest;
-import com.project.binar.okariru.dto.roleResponse;
+import com.project.binar.okariru.dto.RoleRequest;
+import com.project.binar.okariru.dto.RoleResponse;
 
 import java.util.List;
 
-public interface roleService {
+public interface RoleService {
 
-    List<roleResponse.getRoleResponse> getAllRoleService();
+    List<RoleResponse.getRoleResponse> getAllRoleService();
 
-    roleResponse.getRoleResponse getRoleById(Integer idRole);
+    RoleResponse.getRoleResponse getRoleById(Integer idRole);
 
-    roleResponse.getRoleResponse addRole(roleRequest.roleAddRequest addRequest);
+    RoleResponse.getRoleResponse addRole(RoleRequest.roleAddRequest addRequest);
 
     void updateRole(Integer id, String namaRole);
 

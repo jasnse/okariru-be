@@ -1,14 +1,14 @@
 package com.project.binar.okariru.service.impl;
 
-import com.project.binar.okariru.dto.rolegroupRequest;
-import com.project.binar.okariru.dto.rolegroupResponse;
-import com.project.binar.okariru.entity.employeEntity;
-import com.project.binar.okariru.entity.roleEntity;
-import com.project.binar.okariru.entity.rolegroupEntity;
-import com.project.binar.okariru.repository.employeRepository;
-import com.project.binar.okariru.repository.roleRepository;
-import com.project.binar.okariru.repository.rolegroupRepository;
-import com.project.binar.okariru.service.rolegroupService;
+import com.project.binar.okariru.dto.RolegroupRequest;
+import com.project.binar.okariru.dto.RolegroupResponse;
+import com.project.binar.okariru.entity.EmployeEntity;
+import com.project.binar.okariru.entity.RoleEntity;
+import com.project.binar.okariru.entity.RolegroupEntity;
+import com.project.binar.okariru.repository.EmployeRepository;
+import com.project.binar.okariru.repository.RoleRepository;
+import com.project.binar.okariru.repository.RolegroupRepository;
+import com.project.binar.okariru.service.RolegroupService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,17 +20,17 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class rolegroupServiceImpl implements rolegroupService {
+public class RolegroupServiceImpl implements RolegroupService {
 
-    private final rolegroupRepository rolegroupRepository;
-    private final roleRepository roleRepository;
-    private final employeRepository employeRepository;
+    private final RolegroupRepository rolegroupRepository;
+    private final RoleRepository roleRepository;
+    private final EmployeRepository employeRepository;
 
     @Override
-    public List<rolegroupResponse.getRoleGroupResponse> getAllRoleGroup() {
+    public List<RolegroupResponse.getRoleGroupResponse> getAllRoleGroup() {
         return rolegroupRepository.findAll()
                 .stream()
-                .map(roleGList -> new rolegroupResponse.getRoleGroupResponse(
+                .map(roleGList -> new RolegroupResponse.getRoleGroupResponse(
                         roleGList.getRoleGroupId(),
                         roleGList.getRole().getRoleId(),
                         roleGList.getEmployee().getEmployeeId(),
@@ -42,10 +42,10 @@ public class rolegroupServiceImpl implements rolegroupService {
     }
 
     @Override
-    public rolegroupResponse.getRoleGroupResponse getRoleById(Integer idRG) {
-        rolegroupEntity role = rolegroupRepository.findById(idRG)
+    public RolegroupResponse.getRoleGroupResponse getRoleById(Integer idRG) {
+        RolegroupEntity role = rolegroupRepository.findById(idRG)
                 .orElseThrow(() -> new EntityNotFoundException("role dengan Id " + idRG + " tidak ditemukan"));
-        return new rolegroupResponse.getRoleGroupResponse(
+        return new RolegroupResponse.getRoleGroupResponse(
                 role.getRoleGroupId(),
                 role.getRole().getRoleId(),
                 role.getEmployee().getEmployeeId(),
@@ -57,22 +57,22 @@ public class rolegroupServiceImpl implements rolegroupService {
 
     @Override
     @Transactional
-    public rolegroupResponse.getRoleGroupResponse addRoleGroup(rolegroupRequest.roleGroupAddRequest addRequest){
-        roleEntity role = roleRepository.findById(addRequest.roleId)
+    public RolegroupResponse.getRoleGroupResponse addRoleGroup(RolegroupRequest.roleGroupAddRequest addRequest){
+        RoleEntity role = roleRepository.findById(addRequest.roleId)
                 .orElseThrow(() -> new EntityNotFoundException("Role dengan id " + addRequest.roleId + " tidak ditemukan"));
 
-        employeEntity employee = employeRepository.findById(addRequest.employeeId)
+        EmployeEntity employee = employeRepository.findById(addRequest.employeeId)
                 .orElseThrow(() -> new EntityNotFoundException("Employee dengan id " + addRequest.employeeId + " tidak ditemukan"));
 
-        rolegroupEntity roleGroup = new rolegroupEntity();
+        RolegroupEntity roleGroup = new RolegroupEntity();
         roleGroup.setRole(role);
         roleGroup.setEmployee(employee);
         roleGroup.setNamaGroupRole(addRequest.namaGroupRole);
         roleGroup.setCreatedAt(LocalDate.now());
 
-        rolegroupEntity saved = rolegroupRepository.save(roleGroup);
+        RolegroupEntity saved = rolegroupRepository.save(roleGroup);
 
-        return new rolegroupResponse.getRoleGroupResponse(
+        return new RolegroupResponse.getRoleGroupResponse(
                 saved.getRoleGroupId(),
                 saved.getRole().getRoleId(),
                 saved.getEmployee().getEmployeeId(),
@@ -85,13 +85,13 @@ public class rolegroupServiceImpl implements rolegroupService {
     @Override
     @Transactional
     public void updateRoleGroup(Integer id, Integer roleId, Integer employeeId, String namaGroupRole) {
-        Optional<rolegroupEntity> rgOpt = rolegroupRepository.findById(id);
+        Optional<RolegroupEntity> rgOpt = rolegroupRepository.findById(id);
 
         if (rgOpt.isEmpty()) {
             throw new EntityNotFoundException("role group id tidak ditemukan");
         }
 
-        rolegroupEntity rgUpdate = rgOpt.get();
+        RolegroupEntity rgUpdate = rgOpt.get();
         rgUpdate.getRole().setRoleId(roleId);
         rgUpdate.getEmployee().setEmployeeId(employeeId);
         rgUpdate.setNamaGroupRole(namaGroupRole);
@@ -101,7 +101,7 @@ public class rolegroupServiceImpl implements rolegroupService {
 
     @Override
     public String deleteRoleGroup(Integer id) {
-        rolegroupEntity roleGroupDelete = rolegroupRepository.findById(id)
+        RolegroupEntity roleGroupDelete = rolegroupRepository.findById(id)
                 .orElseThrow(()-> new EntityNotFoundException("role id: " + id + " " + "tidak ditemukan" ));
 
         rolegroupRepository.delete(roleGroupDelete);

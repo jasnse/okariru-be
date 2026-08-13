@@ -1,10 +1,10 @@
 package com.project.binar.okariru.controller;
 
-import com.project.binar.okariru.dto.roleRequest;
-import com.project.binar.okariru.dto.roleResponse;
-import com.project.binar.okariru.dto.rolegroupRequest;
-import com.project.binar.okariru.dto.rolegroupResponse;
-import com.project.binar.okariru.service.rolegroupService;
+import com.project.binar.okariru.dto.RoleRequest;
+import com.project.binar.okariru.dto.RoleResponse;
+import com.project.binar.okariru.dto.RolegroupRequest;
+import com.project.binar.okariru.dto.RolegroupResponse;
+import com.project.binar.okariru.service.RolegroupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,49 +15,49 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/roleGroup")
 @RequiredArgsConstructor
-public class roleGroupController {
-    private final rolegroupService rolegroupService;
+public class RoleGroupController {
+    private final RolegroupService rolegroupService;
 
     //get all Role group
     @GetMapping
-    public ResponseEntity<List<rolegroupResponse.getRoleGroupResponse>> findAll() {
+    public ResponseEntity<List<RolegroupResponse.getRoleGroupResponse>> findAll() {
         return ResponseEntity.ok(rolegroupService.getAllRoleGroup());
     }
 
     //get role group by Id
     @GetMapping(headers = "idRoleGroupSearch")
-    public ResponseEntity<rolegroupResponse.getRoleGroupResponse> getRoleById(
+    public ResponseEntity<RolegroupResponse.getRoleGroupResponse> getRoleById(
             @RequestHeader("idRoleGroupSearch") Integer roleGID) {
         return ResponseEntity.ok(rolegroupService.getRoleById(roleGID));
     }
 
     //add role group
     @PostMapping
-    public ResponseEntity<rolegroupResponse.getRoleGroupResponse> addRoleGroup(
-            @Valid @RequestBody rolegroupRequest.roleGroupAddRequest roleGroupadd) {
+    public ResponseEntity<RolegroupResponse.getRoleGroupResponse> addRoleGroup(
+            @Valid @RequestBody RolegroupRequest.roleGroupAddRequest roleGroupadd) {
         return ResponseEntity.ok(rolegroupService.addRoleGroup(roleGroupadd));
     }
 
     //Update Role group
     @PutMapping
-    public ResponseEntity<rolegroupResponse.roleGroupUpdateResponse> updateRole(
+    public ResponseEntity<RolegroupResponse.roleGroupUpdateResponse> updateRole(
             @RequestParam Integer id,
             @Valid
-            @RequestBody rolegroupRequest.roleGroupUpdateRequest roleGUpdate
+            @RequestBody RolegroupRequest.roleGroupUpdateRequest roleGUpdate
     ) {
         rolegroupService.updateRoleGroup(id, roleGUpdate.roleId, roleGUpdate.employeeId, roleGUpdate.namaGroupRole);
 
-        rolegroupResponse.roleGroupUpdateResponse respUpdate = new rolegroupResponse.roleGroupUpdateResponse();
+        RolegroupResponse.roleGroupUpdateResponse respUpdate = new RolegroupResponse.roleGroupUpdateResponse();
         respUpdate.setMessage("Role Berhasil di update");
         return ResponseEntity.ok(respUpdate);
     }
 
     @DeleteMapping
-    public ResponseEntity<rolegroupResponse.roleGroupDeleteResponse> deleteRoleGroup(
+    public ResponseEntity<RolegroupResponse.roleGroupDeleteResponse> deleteRoleGroup(
             @Valid @RequestParam Integer Id) {
         rolegroupService.deleteRoleGroup(Id);
 
-        rolegroupResponse.roleGroupDeleteResponse respDelete = new rolegroupResponse.roleGroupDeleteResponse();
+        RolegroupResponse.roleGroupDeleteResponse respDelete = new RolegroupResponse.roleGroupDeleteResponse();
         respDelete.setMessage("Delete role Group successfully");
         return ResponseEntity.ok(respDelete);
     }

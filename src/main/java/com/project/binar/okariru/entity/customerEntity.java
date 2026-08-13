@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
-public class customerEntity {
+public class CustomerEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull
@@ -22,7 +22,7 @@ public class customerEntity {
     private String userName;
 
     @Column(name = "sid_name")
-    private Integer sidName;
+    private String sidName;
 
     @Column(name = "email")
     private String email;

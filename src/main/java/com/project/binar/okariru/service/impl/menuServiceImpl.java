@@ -1,10 +1,10 @@
 package com.project.binar.okariru.service.impl;
 
-import com.project.binar.okariru.dto.menuRequest;
-import com.project.binar.okariru.dto.menuResponse;
-import com.project.binar.okariru.entity.menuEntity;
-import com.project.binar.okariru.repository.menuRepository;
-import com.project.binar.okariru.service.menuService;
+import com.project.binar.okariru.dto.MenuRequest;
+import com.project.binar.okariru.dto.MenuResponse;
+import com.project.binar.okariru.entity.MenuEntity;
+import com.project.binar.okariru.repository.MenuRepository;
+import com.project.binar.okariru.service.MenuService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,15 +16,15 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class menuServiceImpl implements menuService {
+public class MenuServiceImpl implements MenuService {
 
-    private final menuRepository menuRepository;
+    private final MenuRepository menuRepository;
 
     @Override
-    public List<menuResponse.getMenuResponse> getAllmenuService() {
+    public List<MenuResponse.getMenuResponse> getAllmenuService() {
         return menuRepository.findAll()
                 .stream()
-                .map(menuList -> new menuResponse.getMenuResponse(
+                .map(menuList -> new MenuResponse.getMenuResponse(
                         menuList.getMenuId(),
                         menuList.getNamaMenu(),
                         menuList.getDeskripsiMenu(),
@@ -35,10 +35,10 @@ public class menuServiceImpl implements menuService {
     }
 
     @Override
-    public menuResponse.getMenuResponse getmenuById(Integer idmenu) {
-        menuEntity menu = menuRepository.findById(idmenu)
+    public MenuResponse.getMenuResponse getmenuById(Integer idmenu) {
+        MenuEntity menu = menuRepository.findById(idmenu)
                 .orElseThrow(() -> new EntityNotFoundException("role dengan Id " + idmenu + " tidak ditemukan"));
-        return new menuResponse.getMenuResponse(
+        return new MenuResponse.getMenuResponse(
                 menu.getMenuId(),
                 menu.getNamaMenu(),
                 menu.getDeskripsiMenu(),
@@ -48,14 +48,14 @@ public class menuServiceImpl implements menuService {
     }
 
     @Override
-    public menuResponse.getMenuResponse addMenu(menuRequest.menuAddRequest addRequest){
-        menuEntity menu = new menuEntity();
+    public MenuResponse.getMenuResponse addMenu(MenuRequest.menuAddRequest addRequest){
+        MenuEntity menu = new MenuEntity();
         menu.setNamaMenu(addRequest.namaMenu);
         menu.setDeskripsiMenu(addRequest.deskripsiMenu);
         menu.setCreatedAt(LocalDate.now());
 
-        menuEntity saved = menuRepository.save(menu);
-        return new menuResponse.getMenuResponse(
+        MenuEntity saved = menuRepository.save(menu);
+        return new MenuResponse.getMenuResponse(
                 saved.getMenuId(),
                 saved.getNamaMenu(),
                 saved.getDeskripsiMenu(),
@@ -67,13 +67,13 @@ public class menuServiceImpl implements menuService {
     @Override
     @Transactional
     public void updatemenu(Integer id, String namamenu, String deskripsimenu){
-        Optional<menuEntity> menuOpt = menuRepository.findById(id);
+        Optional<MenuEntity> menuOpt = menuRepository.findById(id);
 
         if (menuOpt.isEmpty()) {
             throw new EntityNotFoundException("menu id tidak ditemukan");
         }
 
-        menuEntity menuUpdate = menuOpt.get();
+        MenuEntity menuUpdate = menuOpt.get();
 
         menuUpdate.setNamaMenu(namamenu);
         menuUpdate.setDeskripsiMenu(deskripsimenu);
@@ -84,7 +84,7 @@ public class menuServiceImpl implements menuService {
 
     @Override
     public String deleteMenu(Integer id) {
-        menuEntity menuDelete = menuRepository.findById(id)
+        MenuEntity menuDelete = menuRepository.findById(id)
                 .orElseThrow(()-> new EntityNotFoundException("menu id: " + id + " " + "tidak ditemukan" ));
 
         menuRepository.delete(menuDelete);

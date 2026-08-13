@@ -7,7 +7,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-public class employeResponse {
+public class EmployeResponse {
 
     public record employeGetResponse(
             Integer Id,

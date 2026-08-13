@@ -1,17 +1,17 @@
 package com.project.binar.okariru.service;
 
-import com.project.binar.okariru.dto.pinjamanRequest;
-import com.project.binar.okariru.dto.pinjamanResponse;
+import com.project.binar.okariru.dto.PinjamanRequest;
+import com.project.binar.okariru.dto.PinjamanResponse;
 
 import java.util.List;
 
-public interface pinjamanService {
+public interface PinjamanService {
 
-    List<pinjamanResponse.getPinjamanResponse> getAllPinjaman();
+    List<PinjamanResponse.getPinjamanResponse> getAllPinjaman();
 
-    pinjamanResponse.getPinjamanResponse getPinjamanById(Integer id);
+    PinjamanResponse.getPinjamanResponse getPinjamanById(Integer id);
 
-    pinjamanResponse.getPinjamanResponse addPinjaman(pinjamanRequest.pinjamanAddRequest addRequest);
+    PinjamanResponse.getPinjamanResponse addPinjaman(PinjamanRequest.pinjamanAddRequest addRequest);
 
     void updatePinjaman(Integer id, String jenisPinjaman, String deskripsiPinjaman, Double bunga, Double biayaLainnya);
 
