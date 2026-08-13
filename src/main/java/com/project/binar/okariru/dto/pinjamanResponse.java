@@ -6,7 +6,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-public class pinjamanResponse {
+public class PinjamanResponse {
 
     @Setter
     @Getter

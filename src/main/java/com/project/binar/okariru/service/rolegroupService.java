@@ -1,17 +1,17 @@
 package com.project.binar.okariru.service;
 
-import com.project.binar.okariru.dto.rolegroupRequest;
-import com.project.binar.okariru.dto.rolegroupResponse;
+import com.project.binar.okariru.dto.RolegroupRequest;
+import com.project.binar.okariru.dto.RolegroupResponse;
 
 import java.util.List;
 
-public interface rolegroupService {
+public interface RolegroupService {
 
-    List<rolegroupResponse.getRoleGroupResponse> getAllRoleGroup();
+    List<RolegroupResponse.getRoleGroupResponse> getAllRoleGroup();
 
-    rolegroupResponse.getRoleGroupResponse getRoleById(Integer idRG);
+    RolegroupResponse.getRoleGroupResponse getRoleById(Integer idRG);
 
-    rolegroupResponse.getRoleGroupResponse addRoleGroup(rolegroupRequest.roleGroupAddRequest addRequest);
+    RolegroupResponse.getRoleGroupResponse addRoleGroup(RolegroupRequest.roleGroupAddRequest addRequest);
 
     void updateRoleGroup(Integer id, Integer roleId, Integer employeeId, String namaGroupRole);
 

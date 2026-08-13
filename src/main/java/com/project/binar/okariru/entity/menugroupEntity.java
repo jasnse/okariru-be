@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
-public class menugroupEntity {
+public class MenugroupEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,12 +22,12 @@ public class menugroupEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "menu_id", referencedColumnName = "menu_id", nullable = false)
-    private menuEntity menu;
+    private MenuEntity menu;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "role_id", referencedColumnName = "role_group_id", nullable = false)
-    private rolegroupEntity role;
+    private RolegroupEntity role;
 
     @Column(name = "nama_group_menu")
     private String namaGroupMenu;

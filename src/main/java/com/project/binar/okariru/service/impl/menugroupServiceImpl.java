@@ -1,14 +1,14 @@
 package com.project.binar.okariru.service.impl;
 
-import com.project.binar.okariru.dto.menugroupRequest;
-import com.project.binar.okariru.dto.menugroupResponse;
-import com.project.binar.okariru.entity.menuEntity;
-import com.project.binar.okariru.entity.menugroupEntity;
-import com.project.binar.okariru.entity.rolegroupEntity;
-import com.project.binar.okariru.repository.menuRepository;
-import com.project.binar.okariru.repository.menugroupRepository;
-import com.project.binar.okariru.repository.rolegroupRepository;
-import com.project.binar.okariru.service.menugroupService;
+import com.project.binar.okariru.dto.MenugroupRequest;
+import com.project.binar.okariru.dto.MenugroupResponse;
+import com.project.binar.okariru.entity.MenuEntity;
+import com.project.binar.okariru.entity.MenugroupEntity;
+import com.project.binar.okariru.entity.RolegroupEntity;
+import com.project.binar.okariru.repository.MenuRepository;
+import com.project.binar.okariru.repository.MenugroupRepository;
+import com.project.binar.okariru.repository.RolegroupRepository;
+import com.project.binar.okariru.service.MenugroupService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,17 +20,17 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class menugroupServiceImpl implements menugroupService {
+public class MenugroupServiceImpl implements MenugroupService {
 
-    private final menugroupRepository menugroupRepository;
-    private final menuRepository menuRepository;
-    private final rolegroupRepository rolegroupRepository;
+    private final MenugroupRepository menugroupRepository;
+    private final MenuRepository menuRepository;
+    private final RolegroupRepository rolegroupRepository;
 
     @Override
-    public List<menugroupResponse.getMenuGroupResponse> getAllMenuGroup() {
+    public List<MenugroupResponse.getMenuGroupResponse> getAllMenuGroup() {
         return menugroupRepository.findAll()
                 .stream()
-                .map(mg -> new menugroupResponse.getMenuGroupResponse(
+                .map(mg -> new MenugroupResponse.getMenuGroupResponse(
                         mg.getMenuGroupId(),
                         mg.getMenu().getMenuId(),
                         mg.getRole().getRoleGroupId(),
@@ -42,10 +42,10 @@ public class menugroupServiceImpl implements menugroupService {
     }
 
     @Override
-    public menugroupResponse.getMenuGroupResponse getMenuGroupById(Integer id) {
-        menugroupEntity mg = menugroupRepository.findById(id)
+    public MenugroupResponse.getMenuGroupResponse getMenuGroupById(Integer id) {
+        MenugroupEntity mg = menugroupRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("menu group dengan Id " + id + " tidak ditemukan"));
-        return new menugroupResponse.getMenuGroupResponse(
+        return new MenugroupResponse.getMenuGroupResponse(
                 mg.getMenuGroupId(),
                 mg.getMenu().getMenuId(),
                 mg.getRole().getRoleGroupId(),
@@ -57,22 +57,22 @@ public class menugroupServiceImpl implements menugroupService {
 
     @Override
     @Transactional
-    public menugroupResponse.getMenuGroupResponse addMenuGroup(menugroupRequest.menuGroupAddRequest addRequest) {
-        menuEntity menu = menuRepository.findById(addRequest.menuId)
+    public MenugroupResponse.getMenuGroupResponse addMenuGroup(MenugroupRequest.menuGroupAddRequest addRequest) {
+        MenuEntity menu = menuRepository.findById(addRequest.menuId)
                 .orElseThrow(() -> new EntityNotFoundException("Menu dengan id " + addRequest.menuId + " tidak ditemukan"));
 
-        rolegroupEntity roleGroup = rolegroupRepository.findById(addRequest.roleGroupId)
+        RolegroupEntity roleGroup = rolegroupRepository.findById(addRequest.roleGroupId)
                 .orElseThrow(() -> new EntityNotFoundException("Role group dengan id " + addRequest.roleGroupId + " tidak ditemukan"));
 
-        menugroupEntity menuGroup = new menugroupEntity();
+        MenugroupEntity menuGroup = new MenugroupEntity();
         menuGroup.setMenu(menu);
         menuGroup.setRole(roleGroup);
         menuGroup.setNamaGroupMenu(addRequest.namaGroupMenu);
         menuGroup.setCreatedAt(LocalDate.now());
 
-        menugroupEntity saved = menugroupRepository.save(menuGroup);
+        MenugroupEntity saved = menugroupRepository.save(menuGroup);
 
-        return new menugroupResponse.getMenuGroupResponse(
+        return new MenugroupResponse.getMenuGroupResponse(
                 saved.getMenuGroupId(),
                 saved.getMenu().getMenuId(),
                 saved.getRole().getRoleGroupId(),
@@ -85,19 +85,19 @@ public class menugroupServiceImpl implements menugroupService {
     @Override
     @Transactional
     public void updateMenuGroup(Integer id, Integer menuId, Integer roleGroupId, String namaGroupMenu) {
-        Optional<menugroupEntity> mgOpt = menugroupRepository.findById(id);
+        Optional<MenugroupEntity> mgOpt = menugroupRepository.findById(id);
 
         if (mgOpt.isEmpty()) {
             throw new EntityNotFoundException("menu group id tidak ditemukan");
         }
 
-        menuEntity menu = menuRepository.findById(menuId)
+        MenuEntity menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new EntityNotFoundException("Menu dengan id " + menuId + " tidak ditemukan"));
 
-        rolegroupEntity roleGroup = rolegroupRepository.findById(roleGroupId)
+        RolegroupEntity roleGroup = rolegroupRepository.findById(roleGroupId)
                 .orElseThrow(() -> new EntityNotFoundException("Role group dengan id " + roleGroupId + " tidak ditemukan"));
 
-        menugroupEntity mgUpdate = mgOpt.get();
+        MenugroupEntity mgUpdate = mgOpt.get();
         mgUpdate.setMenu(menu);
         mgUpdate.setRole(roleGroup);
         mgUpdate.setNamaGroupMenu(namaGroupMenu);
@@ -107,7 +107,7 @@ public class menugroupServiceImpl implements menugroupService {
 
     @Override
     public String deleteMenuGroup(Integer id) {
-        menugroupEntity mgDelete = menugroupRepository.findById(id)
+        MenugroupEntity mgDelete = menugroupRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("menu group id: " + id + " tidak ditemukan"));
 
         menugroupRepository.delete(mgDelete);

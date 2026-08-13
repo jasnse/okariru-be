@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDate;
 
-public class employeRequest {
+public class EmployeRequest {
 
     public static class employeAddRequest{
         @NotBlank(message = "username harus terisi")

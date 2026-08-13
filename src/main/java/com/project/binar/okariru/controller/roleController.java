@@ -1,8 +1,8 @@
 package com.project.binar.okariru.controller;
 
-import com.project.binar.okariru.dto.roleRequest;
-import com.project.binar.okariru.dto.roleResponse;
-import com.project.binar.okariru.service.roleService;
+import com.project.binar.okariru.dto.RoleRequest;
+import com.project.binar.okariru.dto.RoleResponse;
+import com.project.binar.okariru.service.RoleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,49 +13,49 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/roles")
 @RequiredArgsConstructor
-public class roleController {
-    private final roleService roleService;
+public class RoleController {
+    private final RoleService roleService;
 
     //get all Role
     @GetMapping
-    public ResponseEntity<List<roleResponse.getRoleResponse>> findAll() {
+    public ResponseEntity<List<RoleResponse.getRoleResponse>> findAll() {
         return ResponseEntity.ok(roleService.getAllRoleService());
     }
 
     //get role by Id
     @GetMapping(headers = "idRoleSearch")
-    public ResponseEntity<roleResponse.getRoleResponse> findByroleId(
+    public ResponseEntity<RoleResponse.getRoleResponse> findByroleId(
              @RequestHeader("idRoleSearch") Integer roleID) {
         return ResponseEntity.ok(roleService.getRoleById(roleID));
     }
 
     //add role
     @PostMapping
-    public ResponseEntity<roleResponse.getRoleResponse> addRole(
-            @Valid @RequestBody roleRequest.roleAddRequest roleadd) {
+    public ResponseEntity<RoleResponse.getRoleResponse> addRole(
+            @Valid @RequestBody RoleRequest.roleAddRequest roleadd) {
         return ResponseEntity.ok(roleService.addRole(roleadd));
     }
 
     //Update Role
     @PutMapping
-    public ResponseEntity<roleResponse.roleUpdateResponse> updateRole(
+    public ResponseEntity<RoleResponse.roleUpdateResponse> updateRole(
             @RequestParam Integer id,
             @Valid
-            @RequestBody roleRequest.roleUpdateRequest roleupdate
+            @RequestBody RoleRequest.roleUpdateRequest roleupdate
     ) {
         roleService.updateRole(id, roleupdate.nama_role);
 
-        roleResponse.roleUpdateResponse respUpdate = new roleResponse.roleUpdateResponse();
+        RoleResponse.roleUpdateResponse respUpdate = new RoleResponse.roleUpdateResponse();
         respUpdate.setMessage("Role Berhasil di update");
         return ResponseEntity.ok(respUpdate);
     }
 
     //Delete Role
     @DeleteMapping
-    public ResponseEntity<roleResponse.roleDeleteResponse> deleteRole(@RequestParam Integer Id) {
+    public ResponseEntity<RoleResponse.roleDeleteResponse> deleteRole(@RequestParam Integer Id) {
         roleService.deleteRole(Id);
 
-        roleResponse.roleDeleteResponse respDelete = new roleResponse.roleDeleteResponse();
+        RoleResponse.roleDeleteResponse respDelete = new RoleResponse.roleDeleteResponse();
         respDelete.setMessage("Delete role successfully");
         respDelete.setStatus("Successfuly Deleted");
         return ResponseEntity.ok(respDelete);

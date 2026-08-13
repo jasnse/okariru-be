@@ -3,7 +3,7 @@ package com.project.binar.okariru.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public class rolegroupRequest {
+public class RolegroupRequest {
 
     public static class roleGroupAddRequest {
         @NotNull(message = "role_id harus diisi")

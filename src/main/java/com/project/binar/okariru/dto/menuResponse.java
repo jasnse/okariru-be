@@ -6,7 +6,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-public class menuResponse {
+public class MenuResponse {
 
     @Setter
     @Getter

@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDate;
 
-public class menuRequest {
+public class MenuRequest {
 
     public static class menuAddRequest{
         @NotBlank(message = "Nama menu gak boleh kosong")

@@ -3,7 +3,7 @@ package com.project.binar.okariru.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public class pinjamanRequest {
+public class PinjamanRequest {
 
     public static class pinjamanAddRequest {
         @NotBlank(message = "jenis pinjaman harus diisi")

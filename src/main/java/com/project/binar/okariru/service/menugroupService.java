@@ -1,17 +1,17 @@
 package com.project.binar.okariru.service;
 
-import com.project.binar.okariru.dto.menugroupRequest;
-import com.project.binar.okariru.dto.menugroupResponse;
+import com.project.binar.okariru.dto.MenugroupRequest;
+import com.project.binar.okariru.dto.MenugroupResponse;
 
 import java.util.List;
 
-public interface menugroupService {
+public interface MenugroupService {
 
-    List<menugroupResponse.getMenuGroupResponse> getAllMenuGroup();
+    List<MenugroupResponse.getMenuGroupResponse> getAllMenuGroup();
 
-    menugroupResponse.getMenuGroupResponse getMenuGroupById(Integer id);
+    MenugroupResponse.getMenuGroupResponse getMenuGroupById(Integer id);
 
-    menugroupResponse.getMenuGroupResponse addMenuGroup(menugroupRequest.menuGroupAddRequest addRequest);
+    MenugroupResponse.getMenuGroupResponse addMenuGroup(MenugroupRequest.menuGroupAddRequest addRequest);
 
     void updateMenuGroup(Integer id, Integer menuId, Integer roleGroupId, String namaGroupMenu);
 

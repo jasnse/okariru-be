@@ -1,10 +1,10 @@
 package com.project.binar.okariru.controller;
 
-import com.project.binar.okariru.dto.menuRequest;
-import com.project.binar.okariru.dto.menuResponse;
-import com.project.binar.okariru.dto.roleRequest;
-import com.project.binar.okariru.dto.roleResponse;
-import com.project.binar.okariru.service.menuService;
+import com.project.binar.okariru.dto.MenuRequest;
+import com.project.binar.okariru.dto.MenuResponse;
+import com.project.binar.okariru.dto.RoleRequest;
+import com.project.binar.okariru.dto.RoleResponse;
+import com.project.binar.okariru.service.MenuService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,48 +17,48 @@ import static java.awt.SystemColor.menu;
 @RestController
 @RequestMapping("/api/v1/menu")
 @RequiredArgsConstructor
-public class menuController {
+public class MenuController {
 
-    private final menuService menuService;
+    private final MenuService menuService;
 
     //Get all menu
     @GetMapping
-    public ResponseEntity<List<menuResponse.getMenuResponse>> findAll() {
+    public ResponseEntity<List<MenuResponse.getMenuResponse>> findAll() {
         return ResponseEntity.ok(menuService.getAllmenuService());
     }
 
     //get menu By ID
     @GetMapping(headers = "idMenuSearch")
-    public ResponseEntity<menuResponse.getMenuResponse> findByMenuId(@RequestHeader("idMenuSearch") Integer menuId) {
+    public ResponseEntity<MenuResponse.getMenuResponse> findByMenuId(@RequestHeader("idMenuSearch") Integer menuId) {
         return ResponseEntity.ok(menuService.getmenuById(menuId));
     }
 
     //add Menu
     @PostMapping
-    public ResponseEntity<menuResponse.getMenuResponse> addMenu(
-            @Valid @RequestBody menuRequest.menuAddRequest menuAdd) {
+    public ResponseEntity<MenuResponse.getMenuResponse> addMenu(
+            @Valid @RequestBody MenuRequest.menuAddRequest menuAdd) {
         return ResponseEntity.ok(menuService.addMenu(menuAdd));
     }
 
     // update menu
     @PutMapping
-    public ResponseEntity<menuResponse.menuUpdateResponse> updateMenu(
+    public ResponseEntity<MenuResponse.menuUpdateResponse> updateMenu(
             @RequestParam Integer id,
             @Valid
-            @RequestBody menuRequest.menuUpdateRequest menuUpdateRequest
+            @RequestBody MenuRequest.menuUpdateRequest menuUpdateRequest
     ) {
         menuService.updatemenu(id, menuUpdateRequest.namaMenu, menuUpdateRequest.deskripsiMenu);
 
-        menuResponse.menuUpdateResponse respUpdate = new menuResponse.menuUpdateResponse();
+        MenuResponse.menuUpdateResponse respUpdate = new MenuResponse.menuUpdateResponse();
         respUpdate.setMessage("Role Berhasil di update");
         return ResponseEntity.ok(respUpdate);
     }
 
     @DeleteMapping
-    public ResponseEntity<menuResponse.menuDeleteResponse> deleteRole(@RequestParam Integer Id) {
+    public ResponseEntity<MenuResponse.menuDeleteResponse> deleteRole(@RequestParam Integer Id) {
         menuService.deleteMenu(Id);
 
-        menuResponse.menuDeleteResponse respDelete = new menuResponse.menuDeleteResponse();
+        MenuResponse.menuDeleteResponse respDelete = new MenuResponse.menuDeleteResponse();
         respDelete.setMessage("Delete role successfully");
         respDelete.setStatus("Successfuly Deleted");
         return ResponseEntity.ok(respDelete);

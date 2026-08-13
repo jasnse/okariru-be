@@ -56,6 +56,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body("Format request body tidak valid, cek kembali tipe data yang dikirim");
     }
 
+    //validasi business rule gagal (misal nominal bayar melebihi maksimal)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+
     //fallback Error
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneral(Exception e) {

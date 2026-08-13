@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 
-public class rolegroupEntity {
+public class RolegroupEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull
@@ -24,12 +24,12 @@ public class rolegroupEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "role_id", referencedColumnName = "role_id", nullable = false)
-    private roleEntity role;
+    private RoleEntity role;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "employee_id", referencedColumnName = "employee_id", nullable = false)
-    private employeEntity employee;
+    private EmployeEntity employee;
 
     @Column(name = "nama_group_role")
     private String namaGroupRole;

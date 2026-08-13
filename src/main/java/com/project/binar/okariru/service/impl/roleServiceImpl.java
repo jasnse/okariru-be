@@ -1,10 +1,10 @@
 package com.project.binar.okariru.service.impl;
 
-import com.project.binar.okariru.dto.roleRequest;
-import com.project.binar.okariru.dto.roleResponse;
-import com.project.binar.okariru.entity.roleEntity;
-import com.project.binar.okariru.repository.roleRepository;
-import com.project.binar.okariru.service.roleService;
+import com.project.binar.okariru.dto.RoleRequest;
+import com.project.binar.okariru.dto.RoleResponse;
+import com.project.binar.okariru.entity.RoleEntity;
+import com.project.binar.okariru.repository.RoleRepository;
+import com.project.binar.okariru.service.RoleService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,15 +16,15 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class roleServiceImpl implements roleService {
+public class RoleServiceImpl implements RoleService {
 
-    private final roleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
     @Override
-    public List<roleResponse.getRoleResponse> getAllRoleService() {
+    public List<RoleResponse.getRoleResponse> getAllRoleService() {
         return roleRepository.findAll()
                 .stream()
-                .map(roleList -> new roleResponse.getRoleResponse(
+                .map(roleList -> new RoleResponse.getRoleResponse(
                         roleList.getRoleId(),
                         roleList.getNamaRole(),
                         roleList.getCreatedAt(),
@@ -34,10 +34,10 @@ public class roleServiceImpl implements roleService {
     }
 
     @Override
-    public roleResponse.getRoleResponse getRoleById(Integer idRole) {
-        roleEntity role = roleRepository.findById(idRole)
+    public RoleResponse.getRoleResponse getRoleById(Integer idRole) {
+        RoleEntity role = roleRepository.findById(idRole)
                 .orElseThrow(() -> new EntityNotFoundException("role dengan Id " + idRole + " tidak ditemukan"));
-        return new roleResponse.getRoleResponse(
+        return new RoleResponse.getRoleResponse(
                 role.getRoleId(),
                 role.getNamaRole(),
                 role.getCreatedAt(),
@@ -46,13 +46,13 @@ public class roleServiceImpl implements roleService {
     }
 
     @Override
-    public roleResponse.getRoleResponse addRole(roleRequest.roleAddRequest addRequest){
-        roleEntity role = new roleEntity();
+    public RoleResponse.getRoleResponse addRole(RoleRequest.roleAddRequest addRequest){
+        RoleEntity role = new RoleEntity();
         role.setNamaRole(addRequest.namaRole);
         role.setCreatedAt(LocalDate.now());
 
-        roleEntity saved = roleRepository.save(role);
-        return new roleResponse.getRoleResponse(
+        RoleEntity saved = roleRepository.save(role);
+        return new RoleResponse.getRoleResponse(
                 saved.getRoleId(),
                 saved.getNamaRole(),
                 saved.getCreatedAt(),
@@ -63,13 +63,13 @@ public class roleServiceImpl implements roleService {
     @Override
     @Transactional
     public void updateRole(Integer id, String namaRole){
-        Optional<roleEntity> roleOpt = roleRepository.findById(id);
+        Optional<RoleEntity> roleOpt = roleRepository.findById(id);
 
         if (roleOpt.isEmpty()) {
             throw new EntityNotFoundException("role id tidak ditemukan");
         }
 
-        roleEntity roleUpdate = roleOpt.get();
+        RoleEntity roleUpdate = roleOpt.get();
         roleUpdate.setNamaRole(namaRole);
         roleUpdate.setUpdatedAt(LocalDate.now());
         roleRepository.save(roleUpdate);
@@ -77,7 +77,7 @@ public class roleServiceImpl implements roleService {
 
     @Override
     public String deleteRole(Integer id) {
-        roleEntity roleDelete = roleRepository.findById(id)
+        RoleEntity roleDelete = roleRepository.findById(id)
                 .orElseThrow(()-> new EntityNotFoundException("role id: " + id + " " + "tidak ditemukan" ));
 
         roleRepository.delete(roleDelete);

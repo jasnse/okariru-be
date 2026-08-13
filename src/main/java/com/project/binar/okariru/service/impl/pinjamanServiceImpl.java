@@ -1,10 +1,10 @@
 package com.project.binar.okariru.service.impl;
 
-import com.project.binar.okariru.dto.pinjamanRequest;
-import com.project.binar.okariru.dto.pinjamanResponse;
-import com.project.binar.okariru.entity.pinjamanEntity;
-import com.project.binar.okariru.repository.pinjamanRepository;
-import com.project.binar.okariru.service.pinjamanService;
+import com.project.binar.okariru.dto.PinjamanRequest;
+import com.project.binar.okariru.dto.PinjamanResponse;
+import com.project.binar.okariru.entity.PinjamanEntity;
+import com.project.binar.okariru.repository.PinjamanRepository;
+import com.project.binar.okariru.service.PinjamanService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,15 +16,15 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class pinjamanServiceImpl implements pinjamanService {
+public class PinjamanServiceImpl implements PinjamanService {
 
-    private final pinjamanRepository pinjamanRepository;
+    private final PinjamanRepository pinjamanRepository;
 
     @Override
-    public List<pinjamanResponse.getPinjamanResponse> getAllPinjaman() {
+    public List<PinjamanResponse.getPinjamanResponse> getAllPinjaman() {
         return pinjamanRepository.findAll()
                 .stream()
-                .map(pinjaman -> new pinjamanResponse.getPinjamanResponse(
+                .map(pinjaman -> new PinjamanResponse.getPinjamanResponse(
                         pinjaman.getPinjamanId(),
                         pinjaman.getJenisPinjaman(),
                         pinjaman.getDeskripsiPinjaman(),
@@ -37,10 +37,10 @@ public class pinjamanServiceImpl implements pinjamanService {
     }
 
     @Override
-    public pinjamanResponse.getPinjamanResponse getPinjamanById(Integer id) {
-        pinjamanEntity pinjaman = pinjamanRepository.findById(id)
+    public PinjamanResponse.getPinjamanResponse getPinjamanById(Integer id) {
+        PinjamanEntity pinjaman = pinjamanRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("pinjaman dengan Id " + id + " tidak ditemukan"));
-        return new pinjamanResponse.getPinjamanResponse(
+        return new PinjamanResponse.getPinjamanResponse(
                 pinjaman.getPinjamanId(),
                 pinjaman.getJenisPinjaman(),
                 pinjaman.getDeskripsiPinjaman(),
@@ -52,16 +52,16 @@ public class pinjamanServiceImpl implements pinjamanService {
     }
 
     @Override
-    public pinjamanResponse.getPinjamanResponse addPinjaman(pinjamanRequest.pinjamanAddRequest addRequest) {
-        pinjamanEntity pinjaman = new pinjamanEntity();
+    public PinjamanResponse.getPinjamanResponse addPinjaman(PinjamanRequest.pinjamanAddRequest addRequest) {
+        PinjamanEntity pinjaman = new PinjamanEntity();
         pinjaman.setJenisPinjaman(addRequest.jenisPinjaman);
         pinjaman.setDeskripsiPinjaman(addRequest.deskripsiPinjaman);
         pinjaman.setBunga(addRequest.bunga);
         pinjaman.setBiayaLainnya(addRequest.biayaLainnya);
         pinjaman.setCreatedAt(LocalDate.now());
 
-        pinjamanEntity saved = pinjamanRepository.save(pinjaman);
-        return new pinjamanResponse.getPinjamanResponse(
+        PinjamanEntity saved = pinjamanRepository.save(pinjaman);
+        return new PinjamanResponse.getPinjamanResponse(
                 saved.getPinjamanId(),
                 saved.getJenisPinjaman(),
                 saved.getDeskripsiPinjaman(),
@@ -75,13 +75,13 @@ public class pinjamanServiceImpl implements pinjamanService {
     @Override
     @Transactional
     public void updatePinjaman(Integer id, String jenisPinjaman, String deskripsiPinjaman, Double bunga, Double biayaLainnya) {
-        Optional<pinjamanEntity> pinjamanOpt = pinjamanRepository.findById(id);
+        Optional<PinjamanEntity> pinjamanOpt = pinjamanRepository.findById(id);
 
         if (pinjamanOpt.isEmpty()) {
             throw new EntityNotFoundException("pinjaman id tidak ditemukan");
         }
 
-        pinjamanEntity pinjamanUpdate = pinjamanOpt.get();
+        PinjamanEntity pinjamanUpdate = pinjamanOpt.get();
         pinjamanUpdate.setJenisPinjaman(jenisPinjaman);
         pinjamanUpdate.setDeskripsiPinjaman(deskripsiPinjaman);
         pinjamanUpdate.setBunga(bunga);
@@ -92,7 +92,7 @@ public class pinjamanServiceImpl implements pinjamanService {
 
     @Override
     public String deletePinjaman(Integer id) {
-        pinjamanEntity pinjamanDelete = pinjamanRepository.findById(id)
+        PinjamanEntity pinjamanDelete = pinjamanRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("pinjaman id: " + id + " tidak ditemukan"));
 
         pinjamanRepository.delete(pinjamanDelete);
