@@ -16,6 +16,12 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    public static final String PESAN_AUTENTIKASI_DIPERLUKAN = "error autentikasi";
+
+    public static Object body(HttpStatus httpStatus, String pesan) {
+        return new ResponseEntity<>(pesan, httpStatus);
+    }
+
     //validasi @Valid gagal
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleValidation(MethodArgumentNotValidException e) {

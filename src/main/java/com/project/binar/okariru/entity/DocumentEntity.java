@@ -34,7 +34,7 @@ public class DocumentEntity {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "uploadBy", referencedColumnName = "customer_id")
+    @JoinColumn(name = "upload_by", referencedColumnName = "customer_id")
     private CustomerEntity uploadBy;
 
     @Column(name = "upload_date")

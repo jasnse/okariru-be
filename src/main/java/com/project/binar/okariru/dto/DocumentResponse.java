@@ -23,6 +23,14 @@ public class DocumentResponse {
 
     @Setter
     @Getter
+    public static class documentUploadRespose{
+        Integer dokumenId;
+        String namaFile;
+        String pathfile;
+    }
+
+    @Setter
+    @Getter
     public static class documentDeleteResponse {
         String Message;
     }

@@ -89,9 +89,12 @@ public class AngsuranServiceImpl implements AngsuranService {
         );
     }
 
+    //generate angsuran berdasarkan tenor yang di pilih saat pinjaman
     @Override
     @Transactional
     public List<AngsuranResponse.getAngsuranResponse> generateAngsuran(AngsuranRequest.angsuranGenerateRequest generateRequest) {
+
+        //get pinjman by id, validasi pinjaman transaction
         PinjamanTransactionEntity transPinjaman = pinjamanTransactionRepository.findById(generateRequest.transPinjamanId)
                 .orElseThrow(() -> new EntityNotFoundException("Pinjaman transaction dengan id " + generateRequest.transPinjamanId + " tidak ditemukan"));
 
@@ -103,6 +106,7 @@ public class AngsuranServiceImpl implements AngsuranService {
             throw new EntityNotFoundException("Nominal pinjaman belum diisi di pinjaman transaction ini");
         }
 
+        //hitung bunga dan pokok berdasarkan tenor dan rate bunga
         int tenor = generateRequest.tenor;
         long nominalPinjaman = transPinjaman.getNominalPinjaman();
         double bungaRate = transPinjaman.getPinjaman().getBunga() != null ? transPinjaman.getPinjaman().getBunga() : 0.0;
@@ -112,6 +116,7 @@ public class AngsuranServiceImpl implements AngsuranService {
 
         LocalDate tanggalMulai = transPinjaman.getTanggalApproval() != null ? transPinjaman.getTanggalApproval() : LocalDate.now();
 
+        //insert table angsuran berdasarkan jumlah tenor
         List<AngsuranEntity> angsuranList = new ArrayList<>();
         for (int i = 1; i <= tenor; i++) {
             AngsuranEntity angsuran = new AngsuranEntity();
@@ -148,6 +153,7 @@ public class AngsuranServiceImpl implements AngsuranService {
     @Transactional
     public AngsuranResponse.angsuranBayarResponse bayarAngsuran(AngsuranRequest.angsuranBayarRequest bayarRequest) {
 
+        //validasi pinjaman transaction
         PinjamanTransactionEntity transPinjaman = pinjamanTransactionRepository
                 .findById(bayarRequest.transPinjamanId)
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -155,6 +161,7 @@ public class AngsuranServiceImpl implements AngsuranService {
                                 + bayarRequest.transPinjamanId
                                 + " tidak ditemukan"));
 
+        //get pinjaman transaction
         List<AngsuranEntity> angsuranList = angsuranRepository
                 .findByTransPinjamanOrderByTenorAsc(transPinjaman);
 
@@ -162,10 +169,12 @@ public class AngsuranServiceImpl implements AngsuranService {
             throw new EntityNotFoundException("Belum ada angsuran untuk pinjaman transaction ini");
         }
 
+        // hitung total angsuran dari pinjaman tersebut (all tenor)
         int maxBayar = angsuranList.stream()
                 .mapToInt(AngsuranEntity::getSisaTagihan)
                 .sum();
 
+        //validasi nominal yang di input untuk  bayar
         int nominalBayar = bayarRequest.nominalBayar;
         if (nominalBayar > maxBayar) {
             throw new IllegalArgumentException("Nominal bayar melebihi total seluruh sisa tagihan (maksimal " + maxBayar + ")");
@@ -174,7 +183,9 @@ public class AngsuranServiceImpl implements AngsuranService {
         int deposit = nominalBayar;
         int jumlahLunas = 0;
 
+        //looping ke semua tenor angsuran, mengurangi nominal bayarnya setiap iterasi
         for (AngsuranEntity angsuran : angsuranList) {
+
             if (deposit <= 0) {
                 break;
             }

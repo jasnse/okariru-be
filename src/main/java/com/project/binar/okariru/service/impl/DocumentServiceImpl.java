@@ -11,15 +11,20 @@ import com.project.binar.okariru.service.DocumentService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,24 +64,40 @@ public class DocumentServiceImpl implements DocumentService {
                 .toList();
     }
 
-//    @Override
-//    public DocumentResponse.getDocumentResponse getDocumentById(Integer id) {
-//        DocumentEntity document = documentRepository.findById(id)
-//                .orElseThrow(() -> new EntityNotFoundException("document dengan Id " + id + " tidak ditemukan"));
-//        return new DocumentResponse.getDocumentResponse(
-//                document.getDokumenId(),
-//                document.getTransPinjaman().getTransPinjamanId(),
-//                document.getNamaFile(),
-//                document.getPathfile(),
-//                document.getUploadBy().getCustomerId(),
-//                document.getUploadDate(),
-//                document.getStatusVerification()
-//        );
-//    }
+    @Override
+    public List<DocumentResponse.getDocumentResponse> getDocumentByCustomerAndTransPinjaman(Integer customerId, Integer transPinjamanId) {
+        List<DocumentEntity> documentList = documentRepository
+                .findByUploadBy_CustomerIdAndTransPinjaman_TransPinjamanId(customerId, transPinjamanId);
+
+        if (documentList.isEmpty()) {
+            throw new EntityNotFoundException("Dokumen untuk customer " + customerId + " dan pinjaman transaction " + transPinjamanId + " tidak ditemukan");
+        }
+
+        return documentList.stream()
+                .map(doc -> {
+                    String fileUrl = ServletUriComponentsBuilder
+                            .fromCurrentContextPath()          // http://localhost:8080
+                            .path("/api/v1/document/download")  // + endpoint download
+                            .queryParam("pathfile", doc.getPathfile())
+                            .toUriString();
+
+                    return new DocumentResponse.getDocumentResponse(
+                            doc.getDokumenId(),
+                            doc.getTransPinjaman().getTransPinjamanId(),
+                            doc.getNamaFile(),
+                            fileUrl,
+                            doc.getUploadBy().getCustomerId(),
+                            doc.getUploadDate(),
+                            doc.getStatusVerification()
+                    );
+                }) .toList();
+    }
 
     @Override
     @Transactional
-    public DocumentResponse.getDocumentResponse uploadDocument(MultipartFile file, Integer transPinjamanId, Integer customerId) {
+    public List<DocumentResponse.documentUploadRespose> uploadDocument(List<MultipartFile> file, Integer transPinjamanId, Integer customerId) {
+
+        List<DocumentResponse.documentUploadRespose> responseList = new ArrayList<>();
 
        //cek valid input
         PinjamanTransactionEntity transPinjaman = pinjamanTransactionRepository.findById(transPinjamanId)
@@ -89,39 +110,60 @@ public class DocumentServiceImpl implements DocumentService {
             throw new IllegalArgumentException("File tidak boleh kosong");
         }
 
-
-
-        //gabungin path root (dir) + nama penyimpanan file unik
-        String namaAsli = file.getOriginalFilename();
-        String namaUnik = UUID.randomUUID() + "_" + namaAsli;
-
         try {
             Files.createDirectories(root);
-            Path target = root.resolve(namaUnik);
-            Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            throw new RuntimeException("Gagal menyimpan file: " + e.getMessage(), e);
+            throw new RuntimeException("Gagal membuat direktori: " + e.getMessage(), e);
         }
 
-        //set dan save file
-        DocumentEntity document = new DocumentEntity();
-        document.setTransPinjaman(transPinjaman);
-        document.setUploadBy(customer);
-        document.setNamaFile(namaAsli);
-        document.setPathfile(namaUnik);
-        document.setUploadDate(LocalDate.now());
-        document.setStatusVerification("Menunggu Verifikasi");
+        for (MultipartFile fileItem : file) {
+            if (fileItem.isEmpty()) continue;
 
-        DocumentEntity saved = documentRepository.save(document);
-        return new DocumentResponse.getDocumentResponse(
-                saved.getDokumenId(),
-                saved.getTransPinjaman().getTransPinjamanId(),
-                saved.getNamaFile(),
-                saved.getPathfile(),
-                saved.getUploadBy().getCustomerId(),
-                saved.getUploadDate(),
-                saved.getStatusVerification()
-        );
+            //gabungin path root (dir) + nama penyimpanan file unik
+            String namaAsli = fileItem.getOriginalFilename().replaceAll("[^a-zA-Z0-9._-]", "_");
+            String namaUnik = UUID.randomUUID() + "_" + namaAsli;
+
+            try {
+                Path target = root.resolve(namaUnik);
+                Files.copy(fileItem.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+
+                // Simpan metadata ke Database
+                DocumentEntity doc = new DocumentEntity();
+                doc.setTransPinjaman(transPinjaman);
+                doc.setUploadBy(customer);
+                doc.setNamaFile(namaAsli);
+                doc.setPathfile(namaUnik);
+                doc.setUploadDate(LocalDate.now());
+                doc.setStatusVerification("PENDING");
+
+                DocumentEntity savedDoc = documentRepository.save(doc);
+
+                DocumentResponse.documentUploadRespose res = new DocumentResponse.documentUploadRespose();
+                res.setDokumenId(savedDoc.getDokumenId());
+                res.setNamaFile(savedDoc.getNamaFile());
+                res.setPathfile(savedDoc.getPathfile());
+                responseList.add(res);
+            } catch (IOException e) {
+                throw new RuntimeException("Gagal menyimpan file: " + e.getMessage(), e);
+            }
+        }
+        return responseList;
+    }
+
+    @Override
+    public Resource loadFileAsResource(String pathfile) {
+        try {
+            Path filePath = resolve(pathfile);
+            Resource resource = new UrlResource(filePath.toUri());
+
+            // Cek jika file fisik benar-benar ada di folder storage dan bisa dibaca
+            if (resource.exists() && resource.isReadable()) {
+                return resource;
+            }
+            throw new EntityNotFoundException("File tidak ditemukan atau tidak dapat dibaca: " + pathfile);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Path file tidak valid: " + pathfile, e);
+        }
     }
 
     @Override
@@ -133,13 +175,22 @@ public class DocumentServiceImpl implements DocumentService {
 
         documentRepository.delete(document);
 
-//        Delete document dari folder
+        //Delete document dari folder
         try {
-            Files.deleteIfExists(root.resolve(document.getPathfile()));
+            Files.deleteIfExists(resolve(document.getPathfile()));
         } catch (IOException e) {
             throw new RuntimeException("Gagal menghapus file fisik: " + e.getMessage(), e);
         }
 
         return "document dengan ID: " + id + " Telah di hapus";
+    }
+
+    // cegah path traversal (misal pathfile berisi "../../")
+    private Path resolve(String storedFileName) {
+        Path resolved = root.resolve(storedFileName).normalize();
+        if (!resolved.startsWith(root)) {
+            throw new IllegalArgumentException("Nama file tidak valid");
+        }
+        return resolved;
     }
 }

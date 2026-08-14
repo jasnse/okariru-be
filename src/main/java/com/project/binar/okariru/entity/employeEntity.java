@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Table(name = "mst_employee", schema = "core")
 @Setter
@@ -44,4 +45,7 @@ public class EmployeEntity {
 
     @Column(name = "updated_at")
     private LocalDate updatedAt;
+
+    @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+    private List<RolegroupEntity> roleGroups;
 }

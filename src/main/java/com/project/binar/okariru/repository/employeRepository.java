@@ -17,4 +17,13 @@ public interface EmployeRepository extends JpaRepository<EmployeEntity, Integer>
             "(:keyword IS NULL OR LOWER(e.userName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(e.email) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<EmployeEntity> searchEmployees(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query(" SELECT me FROM EmployeEntity me WHERE me.userName = :username")
+    Optional<EmployeEntity> findByUsername(@Param("username") String username);
+
+    @Query("SELECT e FROM EmployeEntity e " +
+            "LEFT JOIN FETCH e.roleGroups rg " +
+            "LEFT JOIN FETCH rg.role " +
+            "WHERE e.userName = :username")
+    Optional<EmployeEntity> findByUsernameWithRoles(@Param("username") String username);
 }
