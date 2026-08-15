@@ -53,6 +53,10 @@ public class PinjamanServiceImpl implements PinjamanService {
 
     @Override
     public PinjamanResponse.getPinjamanResponse addPinjaman(PinjamanRequest.pinjamanAddRequest addRequest) {
+        if (pinjamanRepository.existsByJenisPinjaman(addRequest.jenisPinjaman)) {
+            throw new IllegalArgumentException("Jenis pinjaman " + addRequest.jenisPinjaman + " sudah ada");
+        }
+
         PinjamanEntity pinjaman = new PinjamanEntity();
         pinjaman.setJenisPinjaman(addRequest.jenisPinjaman);
         pinjaman.setDeskripsiPinjaman(addRequest.deskripsiPinjaman);
@@ -79,6 +83,10 @@ public class PinjamanServiceImpl implements PinjamanService {
 
         if (pinjamanOpt.isEmpty()) {
             throw new EntityNotFoundException("pinjaman id tidak ditemukan");
+        }
+
+        if (pinjamanRepository.existsByJenisPinjamanAndPinjamanIdNot(jenisPinjaman, id)) {
+            throw new IllegalArgumentException("Jenis pinjaman " + jenisPinjaman + " sudah ada");
         }
 
         PinjamanEntity pinjamanUpdate = pinjamanOpt.get();

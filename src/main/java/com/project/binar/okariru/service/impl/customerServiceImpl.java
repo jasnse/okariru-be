@@ -8,6 +8,7 @@ import com.project.binar.okariru.service.CustomerService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -19,6 +20,7 @@ import java.util.Optional;
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<CustomerResponse.getCustomerResponse> getAllCustomer() {
@@ -67,11 +69,24 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerResponse.getCustomerResponse addCustomer(CustomerRequest.customerAddRequest addRequest) {
+        if (customerRepository.existsByUserName(addRequest.userName)) {
+            throw new IllegalArgumentException("Username " + addRequest.userName + " sudah terdaftar");
+        }
+        if (customerRepository.existsByEmail(addRequest.email)) {
+            throw new IllegalArgumentException("Email " + addRequest.email + " sudah terdaftar");
+        }
+        if (customerRepository.existsByNik(addRequest.nik)) {
+            throw new IllegalArgumentException("NIK " + addRequest.nik + " sudah terdaftar");
+        }
+        if (addRequest.noRekening != null && customerRepository.existsByNoRekening(addRequest.noRekening)) {
+            throw new IllegalArgumentException("No rekening " + addRequest.noRekening + " sudah terdaftar");
+        }
+
         CustomerEntity customer = new CustomerEntity();
         customer.setUserName(addRequest.userName);
         customer.setSidName(addRequest.sidName);
         customer.setEmail(addRequest.email);
-        customer.setPassword(addRequest.password);
+        customer.setPassword(passwordEncoder.encode(addRequest.password));
         customer.setNik(addRequest.nik);
         customer.setTempatLahir(addRequest.tempatLahir);
         customer.setTanggalLahir(addRequest.tanggalLahir);
@@ -113,11 +128,24 @@ public class CustomerServiceImpl implements CustomerService {
             throw new EntityNotFoundException("customer id tidak ditemukan");
         }
 
+        if (customerRepository.existsByUserNameAndCustomerIdNot(userName, id)) {
+            throw new IllegalArgumentException("Username " + userName + " sudah dipakai customer lain");
+        }
+        if (customerRepository.existsByEmailAndCustomerIdNot(email, id)) {
+            throw new IllegalArgumentException("Email " + email + " sudah dipakai customer lain");
+        }
+        if (customerRepository.existsByNikAndCustomerIdNot(nik, id)) {
+            throw new IllegalArgumentException("NIK " + nik + " sudah dipakai customer lain");
+        }
+        if (noRekening != null && customerRepository.existsByNoRekeningAndCustomerIdNot(noRekening, id)) {
+            throw new IllegalArgumentException("No rekening " + noRekening + " sudah dipakai customer lain");
+        }
+
         CustomerEntity customerUpdate = customerOpt.get();
         customerUpdate.setUserName(userName);
         customerUpdate.setSidName(sidName);
         customerUpdate.setEmail(email);
-        customerUpdate.setPassword(password);
+        customerUpdate.setPassword(passwordEncoder.encode(password));
         customerUpdate.setNik(nik);
         customerUpdate.setTempatLahir(tempatLahir);
         customerUpdate.setTanggalLahir(tanggalLahir);

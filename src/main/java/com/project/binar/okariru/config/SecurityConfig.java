@@ -64,6 +64,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
 
                                 .requestMatchers("/api/v1/employees/login").permitAll()
+                                .requestMatchers("/api/v1/employees").permitAll()
 //                                .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("SUPER_ADMIN")
 //                                .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("SUPER_ADMIN")
 //                                .requestMatchers(HttpMethod.POST, "/api/v1/masterRekening").hasRole("SUPER_ADMIN")
