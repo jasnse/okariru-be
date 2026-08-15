@@ -49,6 +49,10 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public MenuResponse.getMenuResponse addMenu(MenuRequest.menuAddRequest addRequest){
+        if (menuRepository.existsByNamaMenu(addRequest.namaMenu)) {
+            throw new IllegalArgumentException("Menu dengan nama " + addRequest.namaMenu + " sudah ada");
+        }
+
         MenuEntity menu = new MenuEntity();
         menu.setNamaMenu(addRequest.namaMenu);
         menu.setDeskripsiMenu(addRequest.deskripsiMenu);
@@ -71,6 +75,10 @@ public class MenuServiceImpl implements MenuService {
 
         if (menuOpt.isEmpty()) {
             throw new EntityNotFoundException("menu id tidak ditemukan");
+        }
+
+        if (menuRepository.existsByNamaMenuAndMenuIdNot(namamenu, id)) {
+            throw new IllegalArgumentException("Menu dengan nama " + namamenu + " sudah ada");
         }
 
         MenuEntity menuUpdate = menuOpt.get();

@@ -47,6 +47,10 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleResponse.getRoleResponse addRole(RoleRequest.roleAddRequest addRequest){
+        if (roleRepository.existsByNamaRole(addRequest.namaRole)) {
+            throw new IllegalArgumentException("Role dengan nama " + addRequest.namaRole + " sudah ada");
+        }
+
         RoleEntity role = new RoleEntity();
         role.setNamaRole(addRequest.namaRole);
         role.setCreatedAt(LocalDate.now());
@@ -67,6 +71,10 @@ public class RoleServiceImpl implements RoleService {
 
         if (roleOpt.isEmpty()) {
             throw new EntityNotFoundException("role id tidak ditemukan");
+        }
+
+        if (roleRepository.existsByNamaRoleAndRoleIdNot(namaRole, id)) {
+            throw new IllegalArgumentException("Role dengan nama " + namaRole + " sudah ada");
         }
 
         RoleEntity roleUpdate = roleOpt.get();

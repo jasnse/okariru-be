@@ -26,4 +26,9 @@ public interface EmployeRepository extends JpaRepository<EmployeEntity, Integer>
             "LEFT JOIN FETCH rg.role " +
             "WHERE e.userName = :username")
     Optional<EmployeEntity> findByUsernameWithRoles(@Param("username") String username);
+
+    boolean existsByUserName(String userName);
+    boolean existsByEmail(String email);
+    boolean existsByNip(String nip);
+    boolean existsByEmailAndEmployeeIdNot(String email, Integer employeeId);
 }

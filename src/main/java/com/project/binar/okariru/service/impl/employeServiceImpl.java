@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,6 +24,7 @@ import java.util.Optional;
 public class EmployeServiceImpl implements EmployeService {
 
     private final EmployeRepository employeRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Page<EmployeResponse.employeGetResponse> findAll(String keyword, int page, int size) {
@@ -71,10 +73,20 @@ public class EmployeServiceImpl implements EmployeService {
     @Override
     //add Employe
     public EmployeResponse.employeAddResponse addEmploye(EmployeRequest.employeAddRequest addRequest){
+        if (employeRepository.existsByUserName(addRequest.username)) {
+            throw new IllegalArgumentException("Username " + addRequest.username + " sudah terdaftar");
+        }
+        if (employeRepository.existsByEmail(addRequest.email)) {
+            throw new IllegalArgumentException("Email " + addRequest.email + " sudah terdaftar");
+        }
+        if (employeRepository.existsByNip(addRequest.nip)) {
+            throw new IllegalArgumentException("NIP " + addRequest.nip + " sudah terdaftar");
+        }
+
         EmployeEntity employe = new EmployeEntity();
         employe.setUserName(addRequest.username);
         employe.setEmail(addRequest.email);
-        employe.setPassword(addRequest.password);
+        employe.setPassword(passwordEncoder.encode(addRequest.password));
         employe.setNip(addRequest.nip);
         employe.setJoinedDate(LocalDate.now());
 
@@ -96,9 +108,13 @@ public class EmployeServiceImpl implements EmployeService {
             throw new EntityNotFoundException("Employee id tidak ditemukan");
         }
 
+        if (employeRepository.existsByEmailAndEmployeeIdNot(email, id)) {
+            throw new IllegalArgumentException("Email " + email + " sudah dipakai employee lain");
+        }
+
         EmployeEntity employeeUpdate = employeeOpt.get();
         employeeUpdate.setEmail(email);
-        employeeUpdate.setPassword(password);
+        employeeUpdate.setPassword(passwordEncoder.encode(password));
         employeeUpdate.setUpdatedAt(LocalDate.now());
         employeRepository.save(employeeUpdate);
     }

@@ -9,4 +9,7 @@ import java.util.Optional;
 public interface MenuRepository extends JpaRepository<MenuEntity, Integer> {
 
     Optional<MenuEntity> findById(Integer id);
+
+    boolean existsByNamaMenu(String namaMenu);
+    boolean existsByNamaMenuAndMenuIdNot(String namaMenu, Integer menuId);
 }

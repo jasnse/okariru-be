@@ -64,6 +64,10 @@ public class RolegroupServiceImpl implements RolegroupService {
         EmployeEntity employee = employeRepository.findById(addRequest.employeeId)
                 .orElseThrow(() -> new EntityNotFoundException("Employee dengan id " + addRequest.employeeId + " tidak ditemukan"));
 
+        if (rolegroupRepository.existsByRole_RoleIdAndEmployee_EmployeeId(addRequest.roleId, addRequest.employeeId)) {
+            throw new IllegalArgumentException("Kombinasi role " + addRequest.roleId + " dan employee " + addRequest.employeeId + " sudah ada");
+        }
+
         RolegroupEntity roleGroup = new RolegroupEntity();
         roleGroup.setRole(role);
         roleGroup.setEmployee(employee);
@@ -89,6 +93,10 @@ public class RolegroupServiceImpl implements RolegroupService {
 
         if (rgOpt.isEmpty()) {
             throw new EntityNotFoundException("role group id tidak ditemukan");
+        }
+
+        if (rolegroupRepository.existsByRole_RoleIdAndEmployee_EmployeeIdAndRoleGroupIdNot(roleId, employeeId, id)) {
+            throw new IllegalArgumentException("Kombinasi role " + roleId + " dan employee " + employeeId + " sudah ada");
         }
 
         RolegroupEntity rgUpdate = rgOpt.get();

@@ -64,6 +64,10 @@ public class MenugroupServiceImpl implements MenugroupService {
         RolegroupEntity roleGroup = rolegroupRepository.findById(addRequest.roleGroupId)
                 .orElseThrow(() -> new EntityNotFoundException("Role group dengan id " + addRequest.roleGroupId + " tidak ditemukan"));
 
+        if (menugroupRepository.existsByMenu_MenuIdAndRole_RoleGroupId(addRequest.menuId, addRequest.roleGroupId)) {
+            throw new IllegalArgumentException("Kombinasi menu " + addRequest.menuId + " dan role group " + addRequest.roleGroupId + " sudah ada");
+        }
+
         MenugroupEntity menuGroup = new MenugroupEntity();
         menuGroup.setMenu(menu);
         menuGroup.setRole(roleGroup);
@@ -96,6 +100,10 @@ public class MenugroupServiceImpl implements MenugroupService {
 
         RolegroupEntity roleGroup = rolegroupRepository.findById(roleGroupId)
                 .orElseThrow(() -> new EntityNotFoundException("Role group dengan id " + roleGroupId + " tidak ditemukan"));
+
+        if (menugroupRepository.existsByMenu_MenuIdAndRole_RoleGroupIdAndMenuGroupIdNot(menuId, roleGroupId, id)) {
+            throw new IllegalArgumentException("Kombinasi menu " + menuId + " dan role group " + roleGroupId + " sudah ada");
+        }
 
         MenugroupEntity mgUpdate = mgOpt.get();
         mgUpdate.setMenu(menu);
