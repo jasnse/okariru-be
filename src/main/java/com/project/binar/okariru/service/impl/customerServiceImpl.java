@@ -40,7 +40,8 @@ public class CustomerServiceImpl implements CustomerService {
                         customer.getGender(),
                         customer.getNoRekening(),
                         customer.getCreatedAt(),
-                        customer.getUpdatedAt()
+                        customer.getUpdatedAt(),
+                        customer.getRoleCustomer()
                 ))
                 .toList();
     }
@@ -63,7 +64,8 @@ public class CustomerServiceImpl implements CustomerService {
                 customer.getGender(),
                 customer.getNoRekening(),
                 customer.getCreatedAt(),
-                customer.getUpdatedAt()
+                customer.getUpdatedAt(),
+                customer.getRoleCustomer()
         );
     }
 
@@ -97,6 +99,7 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setGender(addRequest.gender);
         customer.setNoRekening(addRequest.noRekening);
         customer.setCreatedAt(LocalDate.now());
+        customer.setRoleCustomer("CUSTOMER");
 
         CustomerEntity saved = customerRepository.save(customer);
         return new CustomerResponse.getCustomerResponse(
@@ -113,7 +116,8 @@ public class CustomerServiceImpl implements CustomerService {
                 saved.getGender(),
                 saved.getNoRekening(),
                 saved.getCreatedAt(),
-                saved.getUpdatedAt()
+                saved.getUpdatedAt(),
+                saved.getRoleCustomer()
         );
     }
 

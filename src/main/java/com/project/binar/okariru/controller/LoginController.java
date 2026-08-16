@@ -11,15 +11,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/v1/employees")
+@RequestMapping("api/v1/login")
 @RequiredArgsConstructor
 public class LoginController {
     private final LoginService loginService;
 
-    @PostMapping("/login")
+    @PostMapping("/employe")
     public ResponseEntity<LoginDTO.loginResponse> loginKaryawan( @RequestBody LoginDTO.loginRequest logReq){
         LoginDTO.loginResponse loginResponse = loginService.loginEmploye(logReq);
 
+        return ResponseEntity.status(HttpStatus.OK).body(loginResponse);
+    }
+
+    @PostMapping("/customer")
+    public ResponseEntity<LoginDTO.loginResponse> loginCustomer (@RequestBody LoginDTO.loginRequest logReq){
+        LoginDTO.loginResponse loginResponse = loginService.loginCustomer(logReq);
         return ResponseEntity.status(HttpStatus.OK).body(loginResponse);
     }
 

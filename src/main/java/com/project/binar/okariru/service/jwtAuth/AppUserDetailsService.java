@@ -2,7 +2,9 @@ package com.project.binar.okariru.service.jwtAuth;
 
 
 import com.project.binar.okariru.entity.AppUser;
+import com.project.binar.okariru.entity.CustomerEntity;
 import com.project.binar.okariru.entity.EmployeEntity;
+import com.project.binar.okariru.repository.CustomerRepository;
 import com.project.binar.okariru.repository.EmployeRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -17,20 +19,38 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AppUserDetailsService implements UserDetailsService {
     private final EmployeRepository employe;
+    private final CustomerRepository customer;
+
+//    @NotNull
+//    @Override
+//    public AppUser loadUserByUsername(@NotNull String username) throws UsernameNotFoundException {
+//        Optional<AppUser> optionalKaryawan = findKaryawan(username);
+//        return optionalKaryawan
+//                .orElseThrow(() -> new UsernameNotFoundException("karyawan dengan username " + username + " tidak ditemukan"));
+//    }
+
+    @Override
+    public AppUser loadUserByUsername(String username) throws UsernameNotFoundException {
+        return findKaryawan(username)
+                .or(() -> findCustomer(username))
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "User dengan username " + username + " tidak ditemukan"));
+    }
 
     @NotNull
-    @Override
-    public AppUser loadUserByUsername(@NotNull String username) throws UsernameNotFoundException {
-        Optional<AppUser> optionalKaryawan = findKaryawan(username);
-        return optionalKaryawan
-                .orElseThrow(() -> new UsernameNotFoundException("User dengan email " + username + " tidak ditemukan"));
-    }
 
     public Optional<AppUser> findKaryawan(String username){
         return employe.findByUsernameWithRoles(username)
                 .filter(karyawan -> karyawan.getPassword() != null)
                 .map(this::toAppUser);
     }
+
+    public Optional<AppUser> findCustomer(String username) {
+        return customer.findByUserName(username)
+                .filter(cust -> cust.getPassword() != null)
+                .map(this::toAppUserCust);
+    }
+
 
     private AppUser toAppUser(EmployeEntity karyawan){
 //        return new AppUser(karyawan.getEmail(), karyawan.getPassword(), karyawan.get);
@@ -44,6 +64,14 @@ public class AppUserDetailsService implements UserDetailsService {
                 karyawan.getUserName(),
                 karyawan.getPassword(),
                 pickRole
+        );
+    }
+
+    private AppUser toAppUserCust(CustomerEntity customer) {
+        return new AppUser(
+                customer.getUserName(),
+                customer.getPassword(),
+                customer.getRoleCustomer()
         );
     }
 }

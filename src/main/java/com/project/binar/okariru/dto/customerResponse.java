@@ -26,6 +26,7 @@ public class CustomerResponse {
         String noRekening;
         LocalDate createdAt;
         LocalDate updatedAt;
+        String roleCustomer;
     }
 
     @Setter

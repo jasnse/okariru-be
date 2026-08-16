@@ -29,6 +29,9 @@ import java.util.Map;
 @EnableWebSecurity
 public class SecurityConfig {
 
+
+
+
     @Value("${app.security.cors-allowed-origin}")
     private List<String> AllowedOrigins;
 
@@ -63,15 +66,64 @@ public class SecurityConfig {
                         .frameOptions(frameOptionsConfig -> frameOptionsConfig.deny()))
                 .authorizeHttpRequests(request -> request
 
-                                .requestMatchers("/api/v1/employees/login").permitAll()
-                                .requestMatchers("/api/v1/employees").permitAll()
-//                                .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("SUPER_ADMIN")
-//                                .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("SUPER_ADMIN")
-//                                .requestMatchers(HttpMethod.POST, "/api/v1/masterRekening").hasRole("SUPER_ADMIN")
-//                                .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("SUPER_ADMIN", "KARYAWAN")
-                                .anyRequest().authenticated()
+                        // ===== PUBLIC =====
+                        .requestMatchers(HttpMethod.POST,"/api/v1/login/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/customer/**").permitAll() //register
 
-//                        .requestMatchers("/api/karyawan/**").hasAllRoles("SUPER_ADMIN", "KARYAWA
+                        //set up employee and permission
+                        .requestMatchers("/api/v1/employees/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/roles/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/menu/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/roleGroup/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/menugroup/**").hasRole("SUPERADMIN")
+
+                        // ===== MASTER DATA =====
+                        .requestMatchers("/api/v1/pinjaman/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/customer/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/plafond/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/pinjaman/transaction/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/angsuran/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/notification/**").hasRole("SUPERADMIN") // blm tau
+                        .requestMatchers("/api/v1/document/**").hasRole("SUPERADMIN")
+
+                        // ===== PINJAMAN =====
+                        .requestMatchers(HttpMethod.POST,"/api/v1/pinjaman").hasRole("BACKOFFICE")
+                        .requestMatchers(HttpMethod.PUT,"/api/v1/pinjaman").hasRole("BACKOFFICE")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/pinjaman")
+                            .hasAnyRole("MARKETING", "BRANCH_MANAGER", "BACKOFFICE", "CUSTOMER")
+                        .requestMatchers(HttpMethod.DELETE,"/api/v1/pinjaman").hasRole("BACKOFFICE")
+
+                        // ===== PLAFOND =====
+                        .requestMatchers(HttpMethod.POST,"/api/v1/plafond").hasRole("BACKOFFICE")
+                        .requestMatchers(HttpMethod.PUT,"/api/v1/plafond").hasRole("BACKOFFICE")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/plafond")
+                            .hasAnyRole("BACKOFFICE", "CUSTOMER")
+                        .requestMatchers(HttpMethod.DELETE,"/api/v1/plafond").hasRole("BACKOFFICE")
+
+                        // ===== TRANSAKSI PINJAMAN =====
+                        .requestMatchers(HttpMethod.POST, "/api/v1/pinjaman/transaction/**")
+                            .hasAnyRole( "MARKETING", "CUSTOMER")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/pinjaman/transaction/**")
+                            .hasAnyRole( "MARKETING","BRANCH_MANAGER", "BACKOFFICE")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/pinjaman/transaction/**")
+                            .hasAnyRole("MARKETING", "BRANCH_MANAGER", "BACKOFFICE", "CUSTOMER")
+
+                        // ===== ANGSURAN  =====
+                        .requestMatchers(HttpMethod.GET, "/api/v1/angsuran")
+                            .hasAnyRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/angsuran/generate")
+                            .hasAnyRole("BACKOFFICE")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/angsuran/bayar")
+                        .hasAnyRole("CUSTOMER")
+
+                        // ===== DOKUMEN  =====
+                        .requestMatchers(HttpMethod.GET, "/api/v1/document")
+                            .hasAnyRole("MARKETING", "BRANCH_MANAGER", "BACKOFFICE")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/document")
+                            .hasAnyRole("CUSTOMER")
+
+                        .anyRequest().authenticated()
+
                 )
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(unauthorizedEntryPoint()))
