@@ -62,4 +62,7 @@ public class CustomerEntity {
 
     @Column(name = "updated_at")
     private LocalDate updatedAt;
+
+    @Column(name = "role_customer")
+    private String roleCustomer;
 }

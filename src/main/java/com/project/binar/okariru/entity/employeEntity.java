@@ -22,7 +22,7 @@ public class EmployeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull
     @Column(name = "employee_id")
-    private int EmployeeId;
+    private int employeeId;
 
     @NotBlank(message = "username gak boleh kosong")
     @Column(name = "user_name")

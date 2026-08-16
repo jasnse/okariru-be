@@ -28,4 +28,17 @@ public class LoginService {
         String token = jwtService.issue(user, Instant.now());
         return new LoginDTO.loginResponse(user.getUsername(), token);
     }
+
+    public LoginDTO.loginResponse loginCustomer(LoginDTO.loginRequest reqlog){
+        AppUser customer = appUserDetailsService.findCustomer(reqlog.getUsername())
+                .orElseThrow(() ->  new BadCredentialsException("Username atau password salah"));
+
+        if (!passwordEncoder.matches(reqlog.getPassword(), customer.getPassword())) {
+            throw new BadCredentialsException("Username atau password salah");
+        }
+
+        String token = jwtService.issue(customer, Instant.now());
+        return new LoginDTO.loginResponse(customer.getUsername(), token);
+
+    }
 }
