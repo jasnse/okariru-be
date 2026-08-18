@@ -14,8 +14,6 @@ public interface CustomerService {
 
     CustomerResponse.getCustomerResponse addCustomer(CustomerRequest.customerAddRequest addRequest);
 
-    void resetPasswordCustomer(int customerId, String newPassword);
-
     void updateCustomer(Integer id, String userName, String sidName, String email, String password, String nik,
                          String tempatLahir, LocalDate tanggalLahir, String alamat, String pekerjaan,
                          Integer pendapatan, String maritalStatus, String gender, String noRekening);

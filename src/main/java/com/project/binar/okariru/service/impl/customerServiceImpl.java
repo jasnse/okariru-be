@@ -123,20 +123,6 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public void resetPasswordCustomer(int customerId, String newPassword){
-        Optional<CustomerEntity> customerOpt = customerRepository.findById(customerId);
-
-        if (customerOpt.isEmpty()) {
-            throw new EntityNotFoundException("customer id tidak ditemukan");
-        }
-
-        CustomerEntity resetPassword =  customerOpt.get();
-        resetPassword.setPassword(passwordEncoder.encode(newPassword) );
-        customerRepository.save(resetPassword);
-    }
-
-    @Override
-    @Transactional
     public void updateCustomer(Integer id, String userName, String sidName, String email, String password, String nik,
                                 String tempatLahir, LocalDate tanggalLahir, String alamat, String pekerjaan,
                                 Integer pendapatan, String maritalStatus, String gender, String noRekening) {
