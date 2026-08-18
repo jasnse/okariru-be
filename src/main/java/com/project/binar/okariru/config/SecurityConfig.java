@@ -69,22 +69,11 @@ public class SecurityConfig {
                         // ===== PUBLIC =====
                         .requestMatchers(HttpMethod.POST,"/api/v1/login/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/customer/**").permitAll() //register
+                        .requestMatchers(HttpMethod.POST, "/api/v1/reset/**").permitAll() //forgot password
 
-                        //set up employee and permission
-                        .requestMatchers("/api/v1/employees/**").hasRole("SUPERADMIN")
-                        .requestMatchers("/api/v1/roles/**").hasRole("SUPERADMIN")
-                        .requestMatchers("/api/v1/menu/**").hasRole("SUPERADMIN")
-                        .requestMatchers("/api/v1/roleGroup/**").hasRole("SUPERADMIN")
-                        .requestMatchers("/api/v1/menugroup/**").hasRole("SUPERADMIN")
 
-                        // ===== MASTER DATA =====
-                        .requestMatchers("/api/v1/pinjaman/**").hasRole("SUPERADMIN")
-                        .requestMatchers("/api/v1/customer/**").hasRole("SUPERADMIN")
-                        .requestMatchers("/api/v1/plafond/**").hasRole("SUPERADMIN")
-                        .requestMatchers("/api/v1/pinjaman/transaction/**").hasRole("SUPERADMIN")
-                        .requestMatchers("/api/v1/angsuran/**").hasRole("SUPERADMIN")
-                        .requestMatchers("/api/v1/notification/**").hasRole("SUPERADMIN") // blm tau
-                        .requestMatchers("/api/v1/document/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/reset/**").hasRole("CUSTOMER")
+
 
                         // ===== PINJAMAN =====
                         .requestMatchers(HttpMethod.POST,"/api/v1/pinjaman").hasRole("BACKOFFICE")
@@ -121,6 +110,23 @@ public class SecurityConfig {
                             .hasAnyRole("MARKETING", "BRANCH_MANAGER", "BACKOFFICE")
                         .requestMatchers(HttpMethod.POST, "/api/v1/document")
                             .hasAnyRole("CUSTOMER")
+
+
+                        //set up employee and permission
+                        .requestMatchers("/api/v1/employees").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/roles/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/menu/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/roleGroup/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/menugroup/**").hasRole("SUPERADMIN")
+
+                        // ===== MASTER DATA =====
+                        .requestMatchers("/api/v1/pinjaman/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/customer/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/plafond/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/pinjaman/transaction/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/angsuran/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/notification/**").hasRole("SUPERADMIN") // blm tau
+                        .requestMatchers("/api/v1/document/**").hasRole("SUPERADMIN")
 
                         .anyRequest().authenticated()
 
