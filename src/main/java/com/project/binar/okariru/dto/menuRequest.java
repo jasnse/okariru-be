@@ -11,6 +11,8 @@ public class MenuRequest {
         public String namaMenu;
         @NotBlank(message = "Minimal tambahin deskripsi menu nya")
         public String deskripsiMenu;
+        public String path;
+        public String icon;
         public LocalDate createdAt;
     }
 
@@ -19,5 +21,7 @@ public class MenuRequest {
         public String namaMenu;
         @NotBlank(message = "deskripsi Menu gak boleh kosong")
         public String deskripsiMenu;
+        public String path;
+        public String icon;
     }
 }

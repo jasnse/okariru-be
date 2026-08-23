@@ -23,6 +23,12 @@ public class MenuEntity {
     @Column(name = "nama_menu")
     private String namaMenu;
 
+    @Column(name = "path")
+    private String path;
+
+    @Column(name = "icon")
+    private String icon;
+
     @Column(name = "deskripsi_menu")
     private String deskripsiMenu;
 

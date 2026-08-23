@@ -15,8 +15,20 @@ public class MenuResponse {
         Integer menuId;
         String namaMenu;
         String deskripsiMenu;
+        String path;
+        String icon;
         LocalDate created_at;
         LocalDate updated_at;
+    }
+
+    @Setter
+    @Getter
+    @AllArgsConstructor
+    public static class myMenuResponse{
+        Integer menuId;
+        String namaMenu;
+        String path;
+        String icon;
     }
 
     @Setter

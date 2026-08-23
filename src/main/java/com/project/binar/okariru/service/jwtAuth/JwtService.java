@@ -48,6 +48,7 @@ import io.jsonwebtoken.Jwts;
     private JwtBuilder builder(AppUser user, Instant issuedAt) {
         return Jwts.builder()
                 .subject(user.getUsername())
+                .claim("role", user.getRole())
                 .issuedAt(Date.from(issuedAt))
                 .signWith(key);
     }
