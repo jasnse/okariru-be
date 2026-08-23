@@ -12,6 +12,7 @@ public class LoginDTO {
     @AllArgsConstructor
     public static class loginResponse {
         private String username;
+        private String role;
         private String token;
     }
 

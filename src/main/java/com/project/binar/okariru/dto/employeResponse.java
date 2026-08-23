@@ -13,6 +13,7 @@ public class EmployeResponse {
             Integer Id,
             String userName,
             String nip,
+            String email,
             LocalDate joinedDate,
             LocalDate updatedDate
     ) {}

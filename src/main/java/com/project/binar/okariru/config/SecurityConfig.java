@@ -72,7 +72,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/reset/**").permitAll() //forgot password
 
 
-                        .requestMatchers("/api/v1/reset/**").hasRole("CUSTOMER")
+//                        .requestMatchers("/api/v1/reset/**").hasRole("CUSTOMER")
 
 
                         // ===== PINJAMAN =====
@@ -115,6 +115,8 @@ public class SecurityConfig {
                         //set up employee and permission
                         .requestMatchers("/api/v1/employees").hasRole("SUPERADMIN")
                         .requestMatchers("/api/v1/roles/**").hasRole("SUPERADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/menu/my-menu")
+                            .hasAnyRole("SUPERADMIN", "MARKETING", "BRANCH_MANAGER", "BACKOFFICE")
                         .requestMatchers("/api/v1/menu/**").hasRole("SUPERADMIN")
                         .requestMatchers("/api/v1/roleGroup/**").hasRole("SUPERADMIN")
                         .requestMatchers("/api/v1/menugroup/**").hasRole("SUPERADMIN")

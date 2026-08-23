@@ -36,6 +36,7 @@ public class EmployeServiceImpl implements EmployeService {
                 employee.getEmployeeId(),
                 employee.getUserName(),
                 employee.getNip(),
+                employee.getEmail(),
                 employee.getJoinedDate(),
                 employee.getUpdatedAt()
         ));
@@ -50,6 +51,7 @@ public class EmployeServiceImpl implements EmployeService {
                         employe.getEmployeeId(),
                         employe.getUserName(),
                         employe.getNip(),
+                        employe.getEmail(),
                         employe.getJoinedDate(),
                         employe.getUpdatedAt()
                 ))
@@ -65,6 +67,7 @@ public class EmployeServiceImpl implements EmployeService {
                 employe.getEmployeeId(),
                 employe.getUserName(),
                 employe.getNip(),
+                employe.getEmail(),
                 employe.getJoinedDate(),
                 employe.getUpdatedAt()
         );

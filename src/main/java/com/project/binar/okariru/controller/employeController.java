@@ -52,8 +52,8 @@ public class EmployeController {
     }
 
     @DeleteMapping
-    public ResponseEntity<EmployeResponse.employeDeleteResponse> deleteEmployee(@RequestParam Integer Id) {
-        employeService.deleteEmployee(Id);
+    public ResponseEntity<EmployeResponse.employeDeleteResponse> deleteEmployee(@RequestParam Integer id) {
+        employeService.deleteEmployee(id);
 
         EmployeResponse.employeDeleteResponse respDelete = new EmployeResponse.employeDeleteResponse();
         respDelete.setMessage("Delete employee successfully");
