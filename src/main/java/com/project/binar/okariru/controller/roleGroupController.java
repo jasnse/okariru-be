@@ -1,15 +1,14 @@
 package com.project.binar.okariru.controller;
 
-import com.project.binar.okariru.dto.RoleRequest;
-import com.project.binar.okariru.dto.RoleResponse;
-import com.project.binar.okariru.dto.RolegroupRequest;
-import com.project.binar.okariru.dto.RolegroupResponse;
+import com.project.binar.okariru.dto.*;
 import com.project.binar.okariru.service.RolegroupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -20,8 +19,10 @@ public class RoleGroupController {
 
     //get all Role group
     @GetMapping
-    public ResponseEntity<List<RolegroupResponse.getRoleGroupResponse>> findAll() {
-        return ResponseEntity.ok(rolegroupService.getAllRoleGroup());
+    public ResponseEntity<List<RolegroupResponse.getRoleGroupResponse>> findAll(
+            @RequestParam(required = false) String keyword
+    ) {
+        return ResponseEntity.ok(rolegroupService.getAllRoleGroup(keyword));
     }
 
     //get role group by Id
@@ -45,7 +46,7 @@ public class RoleGroupController {
             @Valid
             @RequestBody RolegroupRequest.roleGroupUpdateRequest roleGUpdate
     ) {
-        rolegroupService.updateRoleGroup(id, roleGUpdate.roleId, roleGUpdate.employeeId, roleGUpdate.namaGroupRole);
+        rolegroupService.updateRoleGroup(id, roleGUpdate.roleId, roleGUpdate.namaGroupRole);
 
         RolegroupResponse.roleGroupUpdateResponse respUpdate = new RolegroupResponse.roleGroupUpdateResponse();
         respUpdate.setMessage("Role Berhasil di update");
@@ -60,6 +61,40 @@ public class RoleGroupController {
         RolegroupResponse.roleGroupDeleteResponse respDelete = new RolegroupResponse.roleGroupDeleteResponse();
         respDelete.setMessage("Delete role Group successfully");
         return ResponseEntity.ok(respDelete);
+    }
+
+    //list employee yang ada di dalam satu role group
+    @GetMapping("/employees")
+    public ResponseEntity<Page<RolegroupResponse.roleGroupMemberResponse>> getMembers(
+            @RequestParam Integer roleGroupId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(rolegroupService.getMembers(roleGroupId, keyword, page, size));
+    }
+
+    @GetMapping("/employees/add")
+    public ResponseEntity<List<EmployeResponse.employeGetResponse>> getEmployeeNonRg() {
+        List<EmployeResponse.employeGetResponse> employeesNonRg = rolegroupService.findEmployeesNonRG();
+        return ResponseEntity.ok(employeesNonRg);
+    }
+
+    //assign employee ke role group
+    @PostMapping("/employees")
+    public ResponseEntity<Void> assignEmployee(
+            @RequestParam Integer roleGroupId,
+            @Valid @RequestBody RolegroupRequest.assignEmployeeRequest request) {
+        rolegroupService.assignEmployee(roleGroupId, request.employeeId);
+        return ResponseEntity.ok().build();
+    }
+
+    //keluarkan employee dari role group
+    @DeleteMapping("/employees")
+    public ResponseEntity<Void> removeEmployee(
+            @RequestParam Integer roleGroupId,
+            @RequestParam Integer employeeId) {
+        rolegroupService.removeEmployee(roleGroupId, employeeId);
+        return ResponseEntity.ok().build();
     }
 
 }

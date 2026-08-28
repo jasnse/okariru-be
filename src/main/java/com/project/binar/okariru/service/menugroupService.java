@@ -1,5 +1,6 @@
 package com.project.binar.okariru.service;
 
+import com.project.binar.okariru.dto.MenuResponse;
 import com.project.binar.okariru.dto.MenugroupRequest;
 import com.project.binar.okariru.dto.MenugroupResponse;
 
@@ -8,6 +9,10 @@ import java.util.List;
 public interface MenugroupService {
 
     List<MenugroupResponse.getMenuGroupResponse> getAllMenuGroup();
+
+    List<MenugroupResponse.getMenuGroupResponse> getMenuGroupsByRoleGroup(Integer roleGroupId);
+
+    List<MenuResponse.getMenuResponse> getMenusNotInRoleGroup(Integer roleGroupId);
 
     MenugroupResponse.getMenuGroupResponse getMenuGroupById(Integer id);
 

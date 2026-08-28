@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MenuRepository extends JpaRepository<MenuEntity, Integer> {
@@ -20,4 +21,9 @@ public interface MenuRepository extends JpaRepository<MenuEntity, Integer> {
     @Query("SELECT m FROM MenuEntity m WHERE " +
             "(:keyword IS NULL OR LOWER(m.namaMenu) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<MenuEntity> searchMenu(@Param("keyword") String keyword, Pageable pageable);
+
+    //menu yang belum ke-assign ke role group tersebut
+    @Query("SELECT m FROM MenuEntity m WHERE m.menuId NOT IN " +
+            "(SELECT mg.menu.menuId FROM MenugroupEntity mg WHERE mg.role.roleGroupId = :roleGroupId)")
+    List<MenuEntity> findMenusNotInRoleGroup(@Param("roleGroupId") Integer roleGroupId);
 }

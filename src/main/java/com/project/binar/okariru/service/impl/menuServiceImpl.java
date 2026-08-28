@@ -5,7 +5,6 @@ import com.project.binar.okariru.dto.MenuResponse;
 import com.project.binar.okariru.entity.EmployeEntity;
 import com.project.binar.okariru.entity.MenuEntity;
 import com.project.binar.okariru.entity.MenugroupEntity;
-import com.project.binar.okariru.entity.RolegroupEntity;
 import com.project.binar.okariru.repository.EmployeRepository;
 import com.project.binar.okariru.repository.MenuRepository;
 import com.project.binar.okariru.repository.MenugroupRepository;
@@ -34,7 +33,7 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public Page<MenuResponse.getMenuResponse> findAll(String keyword, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("menuId").ascending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("menuId")    .ascending());
 
         Page<MenuEntity> menuPage = menuRepository.searchMenu(keyword, pageable);
 
@@ -49,40 +48,22 @@ public class MenuServiceImpl implements MenuService {
         ));
     }
 
-//    @Override
-//    public List<MenuResponse.getMenuResponse> getAllmenuService() {
-//        return menuRepository.findAll()
-//                .stream()
-//                .map(menuList -> new MenuResponse.getMenuResponse(
-//                        menuList.getMenuId(),
-//                        menuList.getNamaMenu(),
-//                        menuList.getDeskripsiMenu(),
-//                        menuList.getPath(),
-//                        menuList.getIcon(),
-//                        menuList.getCreatedAt(),
-//                        menuList.getUpdatedAt()
-//                ))
-//                .toList();
-//    }
+
+    //get menu berdasarkan role group (yang di assign)
 
     @Override
     public List<MenuResponse.myMenuResponse> getMyMenu(String username) {
         EmployeEntity employee = employeRepository.findByUsernameWithRoles(username)
                 .orElseThrow(() -> new EntityNotFoundException("Employee tidak ditemukan"));
 
-        List<Integer> roleGroupIds = employee.getRoleGroups().stream()
-                .map(RolegroupEntity::getRoleGroupId)
-                .toList();
-
-        if (roleGroupIds.isEmpty()) {
+        if (employee.getRoleGroup() == null) {
             return List.of();
         }
 
-        List<MenugroupEntity> menuGroups = menugroupRepository.findByRole_RoleGroupIdIn(roleGroupIds);
+        List<MenugroupEntity> menuGroups = menugroupRepository.findByRole_RoleGroupId(employee.getRoleGroup().getRoleGroupId());
 
         return menuGroups.stream()
-                .map(MenugroupEntity::getMenu)
-                .distinct()
+                .map(MenugroupEntity::getMenu) //get data sesuai field relasi di menuEntity aja aja
                 .map(menu -> new MenuResponse.myMenuResponse(
                         menu.getMenuId(),
                         menu.getNamaMenu(),

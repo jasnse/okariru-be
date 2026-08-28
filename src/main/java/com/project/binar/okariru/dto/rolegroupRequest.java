@@ -9,9 +9,6 @@ public class RolegroupRequest {
         @NotNull(message = "role_id harus diisi")
         public Integer roleId;
 
-        @NotNull(message = "employee_id harus diisi")
-        public Integer employeeId;
-
         @NotBlank(message = "nama group role gak boleh kosong")
         public String namaGroupRole;
     }
@@ -19,9 +16,12 @@ public class RolegroupRequest {
     public static class roleGroupUpdateRequest{
         @NotNull(message = "role id harus di pilih")
         public Integer roleId;
-        @NotNull(message = "employee id harus di pilih")
-        public Integer employeeId;
         @NotBlank(message = "nama Group Role harus di pilih")
         public String namaGroupRole;
+    }
+
+    public static class assignEmployeeRequest {
+        @NotNull(message = "employee_id harus diisi")
+        public Integer employeeId;
     }
 }
