@@ -73,6 +73,7 @@ public class EmployeServiceImpl implements EmployeService {
         );
 
     }
+
     @Override
     //add Employe
     public EmployeResponse.employeAddResponse addEmploye(EmployeRequest.employeAddRequest addRequest){
@@ -124,9 +125,17 @@ public class EmployeServiceImpl implements EmployeService {
 
     //delete Employe by ID
     @Override
+    @Transactional
     public String deleteEmployee(Integer id) {
         EmployeEntity employe = employeRepository.findById(id)
                 .orElseThrow(()-> new EntityNotFoundException("Employee id: " + id + " " + "tidak ditemukan" ));
+
+        if (employe.getRoleGroup() != null) {
+            throw new IllegalArgumentException(
+                    "Employee masih tergabung di role group " + employe.getRoleGroup().getNamaGroupRole() + ". Keluarkan dari role group dulu sebelum dihapus."
+            );
+        }
+
         employeRepository.delete(employe);
 
         return "Employee dengan ID: " + id + " " + "Telah di hapus";

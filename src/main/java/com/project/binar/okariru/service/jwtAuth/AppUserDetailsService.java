@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -54,12 +53,9 @@ public class AppUserDetailsService implements UserDetailsService {
 
     private AppUser toAppUser(EmployeEntity karyawan){
 //        return new AppUser(karyawan.getEmail(), karyawan.getPassword(), karyawan.get);
-        List<String> roles = karyawan.getRoleGroups() != null ?
-                karyawan.getRoleGroups().stream()
-                        .filter(rg -> rg.getRole() != null)
-                        .map(rg -> rg.getRole().getNamaRole())
-                        .toList() : List.of();
-        String pickRole = roles.isEmpty() ? null : roles.get(0);
+        String pickRole = karyawan.getRoleGroup() != null && karyawan.getRoleGroup().getRole() != null
+                ? karyawan.getRoleGroup().getRole().getNamaRole()
+                : null;
         return new AppUser(
                 karyawan.getUserName(),
                 karyawan.getPassword(),

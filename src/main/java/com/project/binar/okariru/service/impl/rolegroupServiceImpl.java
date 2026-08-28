@@ -1,5 +1,6 @@
 package com.project.binar.okariru.service.impl;
 
+import com.project.binar.okariru.dto.EmployeResponse;
 import com.project.binar.okariru.dto.RolegroupRequest;
 import com.project.binar.okariru.dto.RolegroupResponse;
 import com.project.binar.okariru.entity.EmployeEntity;
@@ -12,11 +13,14 @@ import com.project.binar.okariru.service.RolegroupService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,13 +31,13 @@ public class RolegroupServiceImpl implements RolegroupService {
     private final EmployeRepository employeRepository;
 
     @Override
-    public List<RolegroupResponse.getRoleGroupResponse> getAllRoleGroup() {
-        return rolegroupRepository.findAll()
+    public List<RolegroupResponse.getRoleGroupResponse> getAllRoleGroup(String keyword) {
+        // Panggil method searchRoleGroup yang sudah dibuat di Repository
+        return rolegroupRepository.searchRoleGroup(keyword)
                 .stream()
                 .map(roleGList -> new RolegroupResponse.getRoleGroupResponse(
                         roleGList.getRoleGroupId(),
                         roleGList.getRole().getRoleId(),
-                        roleGList.getEmployee().getEmployeeId(),
                         roleGList.getNamaGroupRole(),
                         roleGList.getCreatedAt(),
                         roleGList.getUpdatedAt()
@@ -48,7 +52,6 @@ public class RolegroupServiceImpl implements RolegroupService {
         return new RolegroupResponse.getRoleGroupResponse(
                 role.getRoleGroupId(),
                 role.getRole().getRoleId(),
-                role.getEmployee().getEmployeeId(),
                 role.getNamaGroupRole(),
                 role.getCreatedAt(),
                 role.getUpdatedAt()
@@ -61,16 +64,8 @@ public class RolegroupServiceImpl implements RolegroupService {
         RoleEntity role = roleRepository.findById(addRequest.roleId)
                 .orElseThrow(() -> new EntityNotFoundException("Role dengan id " + addRequest.roleId + " tidak ditemukan"));
 
-        EmployeEntity employee = employeRepository.findById(addRequest.employeeId)
-                .orElseThrow(() -> new EntityNotFoundException("Employee dengan id " + addRequest.employeeId + " tidak ditemukan"));
-
-        if (rolegroupRepository.existsByRole_RoleIdAndEmployee_EmployeeId(addRequest.roleId, addRequest.employeeId)) {
-            throw new IllegalArgumentException("Kombinasi role " + addRequest.roleId + " dan employee " + addRequest.employeeId + " sudah ada");
-        }
-
         RolegroupEntity roleGroup = new RolegroupEntity();
         roleGroup.setRole(role);
-        roleGroup.setEmployee(employee);
         roleGroup.setNamaGroupRole(addRequest.namaGroupRole);
         roleGroup.setCreatedAt(LocalDate.now());
 
@@ -79,7 +74,6 @@ public class RolegroupServiceImpl implements RolegroupService {
         return new RolegroupResponse.getRoleGroupResponse(
                 saved.getRoleGroupId(),
                 saved.getRole().getRoleId(),
-                saved.getEmployee().getEmployeeId(),
                 saved.getNamaGroupRole(),
                 saved.getCreatedAt(),
                 saved.getUpdatedAt()
@@ -88,32 +82,98 @@ public class RolegroupServiceImpl implements RolegroupService {
 
     @Override
     @Transactional
-    public void updateRoleGroup(Integer id, Integer roleId, Integer employeeId, String namaGroupRole) {
-        Optional<RolegroupEntity> rgOpt = rolegroupRepository.findById(id);
+    public void updateRoleGroup(Integer id, Integer roleId, String namaGroupRole) {
+        RolegroupEntity rgUpdate = rolegroupRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("role group id tidak ditemukan"));
 
-        if (rgOpt.isEmpty()) {
-            throw new EntityNotFoundException("role group id tidak ditemukan");
-        }
+        RoleEntity role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new EntityNotFoundException("Role dengan id " + roleId + " tidak ditemukan"));
 
-        if (rolegroupRepository.existsByRole_RoleIdAndEmployee_EmployeeIdAndRoleGroupIdNot(roleId, employeeId, id)) {
-            throw new IllegalArgumentException("Kombinasi role " + roleId + " dan employee " + employeeId + " sudah ada");
-        }
-
-        RolegroupEntity rgUpdate = rgOpt.get();
-        rgUpdate.getRole().setRoleId(roleId);
-        rgUpdate.getEmployee().setEmployeeId(employeeId);
+        rgUpdate.setRole(role);
         rgUpdate.setNamaGroupRole(namaGroupRole);
         rgUpdate.setUpdatedAt(LocalDate.now());
         rolegroupRepository.save(rgUpdate);
     }
 
     @Override
+    @Transactional
     public String deleteRoleGroup(Integer id) {
         RolegroupEntity roleGroupDelete = rolegroupRepository.findById(id)
                 .orElseThrow(()-> new EntityNotFoundException("role id: " + id + " " + "tidak ditemukan" ));
 
+        if (roleGroupDelete.getEmployees() != null && !roleGroupDelete.getEmployees().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Role group ini masih punya " + roleGroupDelete.getEmployees().size() + " member. Keluarkan semua member dulu sebelum dihapus."
+            );
+        }
+
         rolegroupRepository.delete(roleGroupDelete);
 
         return "roleGroup dengan ID: " + id + " " + "Telah di hapus";
+    }
+
+//    RBAC
+    @Override
+    public Page<RolegroupResponse.roleGroupMemberResponse> getMembers(Integer roleGroupId, String keyword, int page, int size) {
+        if (!rolegroupRepository.existsById(roleGroupId)) {
+            throw new EntityNotFoundException("role group id " + roleGroupId + " tidak ditemukan");
+        }
+        Pageable pageable = PageRequest.of(page, size, Sort.by("employeeId").ascending());
+
+        Page<EmployeEntity> employees = employeRepository.searchMembersByRoleGroup(roleGroupId, keyword, pageable);
+
+        return employees.map(emp -> new RolegroupResponse.roleGroupMemberResponse(
+                emp.getEmployeeId(),
+                emp.getUserName(),
+                emp.getEmail(),
+                emp.getNip()
+        ));
+    }
+
+    @Override
+    public List<EmployeResponse.employeGetResponse> findEmployeesNonRG() {
+        return employeRepository.findEmployeesWithoutRoleGroup()
+                .stream()
+                .map(listEmp -> new EmployeResponse.employeGetResponse(
+                        listEmp.getEmployeeId(),
+                        listEmp.getUserName(),
+                        listEmp.getNip(),
+                        listEmp.getEmail(),
+                        listEmp.getJoinedDate(),
+                        listEmp.getUpdatedAt()
+                )).toList();
+    }
+
+    @Override
+    @Transactional
+    public void assignEmployee(Integer roleGroupId, Integer employeeId) {
+        RolegroupEntity roleGroup = rolegroupRepository.findById(roleGroupId)
+                .orElseThrow(() -> new EntityNotFoundException("role group id " + roleGroupId + " tidak ditemukan"));
+
+        EmployeEntity employee = employeRepository.findById(employeeId)
+                .orElseThrow(() -> new EntityNotFoundException("Employee dengan id " + employeeId + " tidak ditemukan"));
+
+        //cek employe punya role group lain atau enggak
+        if (employee.getRoleGroup() != null) {
+            throw new IllegalArgumentException("Employee ini sudah tergabung di role group lain. Keluarkan dulu sebelum ditambahkan ke role group ini.");
+        }
+
+        //add employe ke rolegroup
+        employee.setRoleGroup(roleGroup);
+        employeRepository.save(employee);
+    }
+
+    @Override
+    @Transactional
+    public void removeEmployee(Integer roleGroupId, Integer employeeId) {
+        EmployeEntity employee = employeRepository.findById(employeeId)
+                .orElseThrow(() -> new EntityNotFoundException("Employee " + employeeId + " tidak ditemukan"));
+
+        if (employee.getRoleGroup() == null || employee.getRoleGroup().getRoleGroupId() != roleGroupId) {
+            throw new EntityNotFoundException("Employee " + employeeId + " tidak ada di role group " + roleGroupId);
+        }
+
+        employee.setRoleGroup(null);
+        employeRepository.save(employee);
     }
 }

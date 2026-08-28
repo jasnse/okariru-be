@@ -1,5 +1,6 @@
 package com.project.binar.okariru.controller;
 
+import com.project.binar.okariru.dto.MenuResponse;
 import com.project.binar.okariru.dto.MenugroupRequest;
 import com.project.binar.okariru.dto.MenugroupResponse;
 import com.project.binar.okariru.service.MenugroupService;
@@ -16,10 +17,21 @@ import java.util.List;
 public class MenugroupController {
     private final MenugroupService menugroupService;
 
-    //get all menu group
+    //get all menu group, atau filter berdasarkan roleGroupId kalau di-isi
     @GetMapping
-    public ResponseEntity<List<MenugroupResponse.getMenuGroupResponse>> findAll() {
+    public ResponseEntity<List<MenugroupResponse.getMenuGroupResponse>> findAll(
+            @RequestParam(required = false) Integer roleGroupId) {
+        if (roleGroupId != null) {
+            return ResponseEntity.ok(menugroupService.getMenuGroupsByRoleGroup(roleGroupId));
+        }
         return ResponseEntity.ok(menugroupService.getAllMenuGroup());
+    }
+
+    //list menu yang belum di-assign ke role group tertentu (buat dropdown "Add Menu")
+    @GetMapping("/add")
+    public ResponseEntity<List<MenuResponse.getMenuResponse>> getMenusNotInRoleGroup(
+            @RequestParam Integer roleGroupId) {
+        return ResponseEntity.ok(menugroupService.getMenusNotInRoleGroup(roleGroupId));
     }
 
     //get menu group by Id

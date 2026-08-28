@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface EmployeRepository extends JpaRepository<EmployeEntity, Integer> {
@@ -18,14 +19,24 @@ public interface EmployeRepository extends JpaRepository<EmployeEntity, Integer>
             "LOWER(e.email) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<EmployeEntity> searchEmployees(@Param("keyword") String keyword, Pageable pageable);
 
+    @Query("SELECT e FROM EmployeEntity e WHERE e.roleGroup.roleGroupId = :roleGroupId AND " +
+            "(:keyword IS NULL OR " +
+            "LOWER(e.userName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(e.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(e.nip) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<EmployeEntity> searchMembersByRoleGroup(@Param("roleGroupId") Integer roleGroupId, @Param("keyword") String keyword, Pageable pageable);
+
     @Query(" SELECT me FROM EmployeEntity me WHERE me.userName = :username")
     Optional<EmployeEntity> findByUsername(@Param("username") String username);
 
     @Query("SELECT e FROM EmployeEntity e " +
-            "LEFT JOIN FETCH e.roleGroups rg " +
+            "LEFT JOIN FETCH e.roleGroup rg " +
             "LEFT JOIN FETCH rg.role " +
             "WHERE e.userName = :username")
     Optional<EmployeEntity> findByUsernameWithRoles(@Param("username") String username);
+
+    @Query("SELECT e FROM EmployeEntity e WHERE e.roleGroup IS NULL")
+    List<EmployeEntity> findEmployeesWithoutRoleGroup();
 
     boolean existsByUserName(String userName);
     boolean existsByEmail(String email);

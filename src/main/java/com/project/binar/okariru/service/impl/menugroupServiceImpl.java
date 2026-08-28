@@ -1,5 +1,6 @@
 package com.project.binar.okariru.service.impl;
 
+import com.project.binar.okariru.dto.MenuResponse;
 import com.project.binar.okariru.dto.MenugroupRequest;
 import com.project.binar.okariru.dto.MenugroupResponse;
 import com.project.binar.okariru.entity.MenuEntity;
@@ -30,13 +31,38 @@ public class MenugroupServiceImpl implements MenugroupService {
     public List<MenugroupResponse.getMenuGroupResponse> getAllMenuGroup() {
         return menugroupRepository.findAll()
                 .stream()
-                .map(mg -> new MenugroupResponse.getMenuGroupResponse(
-                        mg.getMenuGroupId(),
-                        mg.getMenu().getMenuId(),
-                        mg.getRole().getRoleGroupId(),
-                        mg.getNamaGroupMenu(),
-                        mg.getCreatedAt(),
-                        mg.getUpdatedAt()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Override
+    public List<MenugroupResponse.getMenuGroupResponse> getMenuGroupsByRoleGroup(Integer roleGroupId) {
+        if (!rolegroupRepository.existsById(roleGroupId)) {
+            throw new EntityNotFoundException("Role group dengan id " + roleGroupId + " tidak ditemukan");
+        }
+
+        return menugroupRepository.findByRole_RoleGroupId(roleGroupId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Override
+    public List<MenuResponse.getMenuResponse> getMenusNotInRoleGroup(Integer roleGroupId) {
+        if (!rolegroupRepository.existsById(roleGroupId)) {
+            throw new EntityNotFoundException("Role group dengan id " + roleGroupId + " tidak ditemukan");
+        }
+
+        return menuRepository.findMenusNotInRoleGroup(roleGroupId)
+                .stream()
+                .map(menu -> new MenuResponse.getMenuResponse(
+                        menu.getMenuId(),
+                        menu.getNamaMenu(),
+                        menu.getDeskripsiMenu(),
+                        menu.getPath(),
+                        menu.getIcon(),
+                        menu.getCreatedAt(),
+                        menu.getUpdatedAt()
                 ))
                 .toList();
     }
@@ -45,9 +71,14 @@ public class MenugroupServiceImpl implements MenugroupService {
     public MenugroupResponse.getMenuGroupResponse getMenuGroupById(Integer id) {
         MenugroupEntity mg = menugroupRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("menu group dengan Id " + id + " tidak ditemukan"));
+        return toResponse(mg);
+    }
+
+    private MenugroupResponse.getMenuGroupResponse toResponse(MenugroupEntity mg) {
         return new MenugroupResponse.getMenuGroupResponse(
                 mg.getMenuGroupId(),
                 mg.getMenu().getMenuId(),
+                mg.getMenu().getNamaMenu(),
                 mg.getRole().getRoleGroupId(),
                 mg.getNamaGroupMenu(),
                 mg.getCreatedAt(),
@@ -76,14 +107,7 @@ public class MenugroupServiceImpl implements MenugroupService {
 
         MenugroupEntity saved = menugroupRepository.save(menuGroup);
 
-        return new MenugroupResponse.getMenuGroupResponse(
-                saved.getMenuGroupId(),
-                saved.getMenu().getMenuId(),
-                saved.getRole().getRoleGroupId(),
-                saved.getNamaGroupMenu(),
-                saved.getCreatedAt(),
-                saved.getUpdatedAt()
-        );
+        return toResponse(saved);
     }
 
     @Override
