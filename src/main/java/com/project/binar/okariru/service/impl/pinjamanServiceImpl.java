@@ -1,13 +1,19 @@
 package com.project.binar.okariru.service.impl;
 
+import com.project.binar.okariru.dto.MenuResponse;
 import com.project.binar.okariru.dto.PinjamanRequest;
 import com.project.binar.okariru.dto.PinjamanResponse;
+import com.project.binar.okariru.entity.MenuEntity;
 import com.project.binar.okariru.entity.PinjamanEntity;
 import com.project.binar.okariru.repository.PinjamanRepository;
 import com.project.binar.okariru.service.PinjamanService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -34,6 +40,24 @@ public class PinjamanServiceImpl implements PinjamanService {
                         pinjaman.getUpdatedAt()
                 ))
                 .toList();
+    }
+
+    @Override
+    public Page<PinjamanResponse.getPinjamanResponse> findAll(String keyword, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("pinjamanId").ascending());
+
+        Page<PinjamanEntity> pinjamanPage = pinjamanRepository.searchPinjaman(keyword, pageable);
+
+        return pinjamanPage.map(pinjaman -> new PinjamanResponse.getPinjamanResponse(
+                pinjaman.getPinjamanId(),
+                pinjaman.getJenisPinjaman(),
+                pinjaman.getDeskripsiPinjaman(),
+                pinjaman.getBunga(),
+                pinjaman.getBiayaLainnya(),
+                pinjaman.getCreatedAt(),
+                pinjaman.getUpdatedAt()
+        ));
     }
 
     @Override

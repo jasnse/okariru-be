@@ -3,6 +3,7 @@ package com.project.binar.okariru.service;
 import com.project.binar.okariru.dto.MenuResponse;
 import com.project.binar.okariru.dto.MenugroupRequest;
 import com.project.binar.okariru.dto.MenugroupResponse;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ public interface MenugroupService {
 
     List<MenugroupResponse.getMenuGroupResponse> getAllMenuGroup();
 
-    List<MenugroupResponse.getMenuGroupResponse> getMenuGroupsByRoleGroup(Integer roleGroupId);
+    Page<MenugroupResponse.getMenuGroupResponse> getMenuGroupsByRoleGroup(Integer roleGroupId, String keyword, int page, int size);
 
     List<MenuResponse.getMenuResponse> getMenusNotInRoleGroup(Integer roleGroupId);
 
@@ -18,7 +19,7 @@ public interface MenugroupService {
 
     MenugroupResponse.getMenuGroupResponse addMenuGroup(MenugroupRequest.menuGroupAddRequest addRequest);
 
-    void updateMenuGroup(Integer id, Integer menuId, Integer roleGroupId, String namaGroupMenu);
+    void updateMenuGroup(Integer id, Integer menuId, Integer roleGroupId);
 
     String deleteMenuGroup(Integer id);
 }

@@ -5,6 +5,7 @@ import com.project.binar.okariru.dto.PinjamanResponse;
 import com.project.binar.okariru.service.PinjamanService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,9 +18,19 @@ public class PinjamanController {
     private final PinjamanService pinjamanService;
 
     //get all pinjaman
+//    @GetMapping
+//    public ResponseEntity<List<PinjamanResponse.getPinjamanResponse>> getAllPinjaman() {
+//        return ResponseEntity.ok(pinjamanService.getAllPinjaman());
+//    }
+
+    //get all pinjaman with pagination
     @GetMapping
-    public ResponseEntity<List<PinjamanResponse.getPinjamanResponse>> findAll() {
-        return ResponseEntity.ok(pinjamanService.getAllPinjaman());
+    public ResponseEntity<Page<PinjamanResponse.getPinjamanResponse>> findAll(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ){
+        return ResponseEntity.ok(pinjamanService.findAll(keyword, page, size));
     }
 
     //get pinjaman by Id
