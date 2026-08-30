@@ -6,6 +6,7 @@ import com.project.binar.okariru.dto.MenugroupResponse;
 import com.project.binar.okariru.service.MenugroupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,12 +18,15 @@ import java.util.List;
 public class MenugroupController {
     private final MenugroupService menugroupService;
 
-    //get all menu group, atau filter berdasarkan roleGroupId kalau di-isi
+    //get all menu group, atau filter+search+pagination berdasarkan roleGroupId kalau di-isi
     @GetMapping
-    public ResponseEntity<List<MenugroupResponse.getMenuGroupResponse>> findAll(
-            @RequestParam(required = false) Integer roleGroupId) {
+    public ResponseEntity<?> findAll(
+            @RequestParam(required = false) Integer roleGroupId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         if (roleGroupId != null) {
-            return ResponseEntity.ok(menugroupService.getMenuGroupsByRoleGroup(roleGroupId));
+            return ResponseEntity.ok(menugroupService.getMenuGroupsByRoleGroup(roleGroupId, keyword, page, size));
         }
         return ResponseEntity.ok(menugroupService.getAllMenuGroup());
     }
@@ -55,7 +59,7 @@ public class MenugroupController {
             @RequestParam Integer id,
             @Valid @RequestBody MenugroupRequest.menuGroupUpdateRequest request
     ) {
-        menugroupService.updateMenuGroup(id, request.menuId, request.roleGroupId, request.namaGroupMenu);
+        menugroupService.updateMenuGroup(id, request.menuId, request.roleGroupId);
 
         MenugroupResponse.menuGroupUpdateResponse respUpdate = new MenugroupResponse.menuGroupUpdateResponse();
         respUpdate.setMessage("Menu Group Berhasil di update");

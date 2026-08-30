@@ -16,7 +16,6 @@ public class MenugroupResponse {
         Integer menuId;
         String namaMenu;
         Integer roleGroupId;
-        String namaGroupMenu;
         LocalDate createdAt;
         LocalDate updatedAt;
     }

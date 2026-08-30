@@ -10,8 +10,6 @@ public class MenugroupRequest {
         public Integer menuId;
         @NotNull(message = "role group id harus di pilih")
         public Integer roleGroupId;
-        @NotBlank(message = "nama Group Menu harus di isi")
-        public String namaGroupMenu;
     }
 
     public static class menuGroupUpdateRequest {
@@ -19,7 +17,5 @@ public class MenugroupRequest {
         public Integer menuId;
         @NotNull(message = "role group id harus di pilih")
         public Integer roleGroupId;
-        @NotBlank(message = "nama Group Menu harus di isi")
-        public String namaGroupMenu;
     }
 }

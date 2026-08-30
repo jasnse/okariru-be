@@ -76,11 +76,11 @@ public class SecurityConfig {
 
 
                         // ===== PINJAMAN =====
-                        .requestMatchers(HttpMethod.POST,"/api/v1/pinjaman").hasRole("BACKOFFICE")
-                        .requestMatchers(HttpMethod.PUT,"/api/v1/pinjaman").hasRole("BACKOFFICE")
+                        .requestMatchers(HttpMethod.POST,"/api/v1/pinjaman").hasAnyRole("SUPERADMIN", "BACKOFFICE")
+                        .requestMatchers(HttpMethod.PUT,"/api/v1/pinjaman").hasAnyRole("SUPERADMIN","BACKOFFICE")
                         .requestMatchers(HttpMethod.GET, "/api/v1/pinjaman")
-                            .hasAnyRole("MARKETING", "BRANCH_MANAGER", "BACKOFFICE", "CUSTOMER")
-                        .requestMatchers(HttpMethod.DELETE,"/api/v1/pinjaman").hasRole("BACKOFFICE")
+                            .hasAnyRole("MARKETING", "BRANCH_MANAGER", "BACKOFFICE", "CUSTOMER", "SUPERADMIN")
+                        .requestMatchers(HttpMethod.DELETE,"/api/v1/pinjaman").hasAnyRole("SUPERADMIN", "BACKOFFICE")
 
                         // ===== PLAFOND =====
                         .requestMatchers(HttpMethod.POST,"/api/v1/plafond").hasRole("BACKOFFICE")

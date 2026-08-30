@@ -13,6 +13,10 @@ import com.project.binar.okariru.service.MenugroupService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -36,15 +40,15 @@ public class MenugroupServiceImpl implements MenugroupService {
     }
 
     @Override
-    public List<MenugroupResponse.getMenuGroupResponse> getMenuGroupsByRoleGroup(Integer roleGroupId) {
+    public Page<MenugroupResponse.getMenuGroupResponse> getMenuGroupsByRoleGroup(Integer roleGroupId, String keyword, int page, int size) {
         if (!rolegroupRepository.existsById(roleGroupId)) {
             throw new EntityNotFoundException("Role group dengan id " + roleGroupId + " tidak ditemukan");
         }
 
-        return menugroupRepository.findByRole_RoleGroupId(roleGroupId)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("menuGroupId").ascending());
+
+        return menugroupRepository.searchByRoleGroup(roleGroupId, keyword, pageable)
+                .map(this::toResponse);
     }
 
     @Override
@@ -80,7 +84,6 @@ public class MenugroupServiceImpl implements MenugroupService {
                 mg.getMenu().getMenuId(),
                 mg.getMenu().getNamaMenu(),
                 mg.getRole().getRoleGroupId(),
-                mg.getNamaGroupMenu(),
                 mg.getCreatedAt(),
                 mg.getUpdatedAt()
         );
@@ -102,7 +105,6 @@ public class MenugroupServiceImpl implements MenugroupService {
         MenugroupEntity menuGroup = new MenugroupEntity();
         menuGroup.setMenu(menu);
         menuGroup.setRole(roleGroup);
-        menuGroup.setNamaGroupMenu(addRequest.namaGroupMenu);
         menuGroup.setCreatedAt(LocalDate.now());
 
         MenugroupEntity saved = menugroupRepository.save(menuGroup);
@@ -112,7 +114,7 @@ public class MenugroupServiceImpl implements MenugroupService {
 
     @Override
     @Transactional
-    public void updateMenuGroup(Integer id, Integer menuId, Integer roleGroupId, String namaGroupMenu) {
+    public void updateMenuGroup(Integer id, Integer menuId, Integer roleGroupId) {
         Optional<MenugroupEntity> mgOpt = menugroupRepository.findById(id);
 
         if (mgOpt.isEmpty()) {
@@ -132,7 +134,6 @@ public class MenugroupServiceImpl implements MenugroupService {
         MenugroupEntity mgUpdate = mgOpt.get();
         mgUpdate.setMenu(menu);
         mgUpdate.setRole(roleGroup);
-        mgUpdate.setNamaGroupMenu(namaGroupMenu);
         mgUpdate.setUpdatedAt(LocalDate.now());
         menugroupRepository.save(mgUpdate);
     }
