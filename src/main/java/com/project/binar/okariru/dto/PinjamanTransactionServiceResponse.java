@@ -13,7 +13,9 @@ public class PinjamanTransactionServiceResponse {
     @AllArgsConstructor
     public static class getPinjamanTransactionResponse {
         Integer transPinjamanId;
+        String kodeTransaksi;
         Integer customerId;
+        String customerName;
         Integer pinjamanId;
         LocalDate tanggalPengajuan;
         LocalDate tanggalReview;

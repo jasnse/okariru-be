@@ -1,5 +1,6 @@
 package com.project.binar.okariru.service.impl;
 
+import com.project.binar.okariru.dto.PinjamanResponse;
 import com.project.binar.okariru.dto.PinjamanTransactionServiceRequest;
 import com.project.binar.okariru.dto.PinjamanTransactionServiceResponse;
 import com.project.binar.okariru.entity.CustomerEntity;
@@ -14,6 +15,10 @@ import com.project.binar.okariru.service.PinjamanTransactionService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -29,25 +34,52 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
     private final PinjamanRepository pinjamanRepository;
     private final EmployeRepository employeRepository;
 
+//    @Override
+//    public List<PinjamanTransactionServiceResponse.getPinjamanTransactionResponse> getAllPinjamanTransaction() {
+//        return pinjamanTransactionRepository.findAll()
+//                .stream()
+//                .map(trx -> new PinjamanTransactionServiceResponse.getPinjamanTransactionResponse(
+//                        trx.getTransPinjamanId(),
+//                        trx.getKodeTransaksi(),
+//                        trx.getCustomer().getCustomerId(),
+//                        trx.getPinjaman() != null ? trx.getPinjaman().getPinjamanId() : null,
+//                        trx.getTanggalPengajuan(),
+//                        trx.getTanggalReview(),
+//                        trx.getTanggalApproval(),
+//                        trx.getNominalPinjaman(),
+//                        trx.getStatusPengajuan(),
+//                        trx.getNoteApproval(),
+//                        trx.getRejectNote(),
+//                        trx.getLastUpdate(),
+//                        trx.getLastUpdateBy() != null ? trx.getLastUpdateBy().getEmployeeId() : null
+//                ))
+//                .toList();
+//    }
+
     @Override
-    public List<PinjamanTransactionServiceResponse.getPinjamanTransactionResponse> getAllPinjamanTransaction() {
-        return pinjamanTransactionRepository.findAll()
-                .stream()
-                .map(trx -> new PinjamanTransactionServiceResponse.getPinjamanTransactionResponse(
-                        trx.getTransPinjamanId(),
-                        trx.getCustomer().getCustomerId(),
-                        trx.getPinjaman() != null ? trx.getPinjaman().getPinjamanId() : null,
-                        trx.getTanggalPengajuan(),
-                        trx.getTanggalReview(),
-                        trx.getTanggalApproval(),
-                        trx.getNominalPinjaman(),
-                        trx.getStatusPengajuan(),
-                        trx.getNoteApproval(),
-                        trx.getRejectNote(),
-                        trx.getLastUpdate(),
-                        trx.getLastUpdateBy() != null ? trx.getLastUpdateBy().getEmployeeId() : null
-                ))
-                .toList();
+    public Page<PinjamanTransactionServiceResponse.getPinjamanTransactionResponse> findAll(String status, String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("transPinjamanId").ascending());
+
+        Page<PinjamanTransactionEntity> pinjamanTransPage = pinjamanTransactionRepository.searchPinjamanTrx(status, keyword, pageable);
+
+        return pinjamanTransPage.map(pinjamanTrx -> new PinjamanTransactionServiceResponse.getPinjamanTransactionResponse(
+                pinjamanTrx.getTransPinjamanId(),
+                pinjamanTrx.getKodeTransaksi(),
+                pinjamanTrx.getCustomer().getCustomerId(),
+                pinjamanTrx.getCustomer().getUserName(),
+                pinjamanTrx.getPinjaman() != null ? pinjamanTrx.getPinjaman().getPinjamanId() : null,
+                pinjamanTrx.getTanggalPengajuan(),
+                pinjamanTrx.getTanggalReview(),
+                pinjamanTrx.getTanggalApproval(),
+                pinjamanTrx.getNominalPinjaman(),
+                pinjamanTrx.getStatusPengajuan(),
+                pinjamanTrx.getNoteApproval(),
+                pinjamanTrx.getRejectNote(),
+                pinjamanTrx.getLastUpdate(),
+                pinjamanTrx.getLastUpdateBy() != null ? pinjamanTrx.getLastUpdateBy().getEmployeeId(): null
+
+        ));
+
     }
 
     @Override
@@ -56,7 +88,9 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
                 .orElseThrow(() -> new EntityNotFoundException("pinjaman transaction dengan Id " + id + " tidak ditemukan"));
         return new PinjamanTransactionServiceResponse.getPinjamanTransactionResponse(
                 trx.getTransPinjamanId(),
+                trx.getKodeTransaksi(),
                 trx.getCustomer().getCustomerId(),
+                trx.getCustomer().getUserName(),
                 trx.getPinjaman() != null ? trx.getPinjaman().getPinjamanId() : null,
                 trx.getTanggalPengajuan(),
                 trx.getTanggalReview(),
@@ -89,9 +123,15 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
         }
 
         PinjamanTransactionEntity saved = pinjamanTransactionRepository.save(trx);
+        saved.setKodeTransaksi(String.format("TRX-%d-%05d", LocalDate.now().getYear(), trx.getTransPinjamanId()));
+
+        saved = pinjamanTransactionRepository.save(saved);
+
         return new PinjamanTransactionServiceResponse.getPinjamanTransactionResponse(
                 saved.getTransPinjamanId(),
+                saved.getKodeTransaksi(),
                 saved.getCustomer().getCustomerId(),
+                saved.getCustomer().getUserName(),
                 saved.getPinjaman() != null ? saved.getPinjaman().getPinjamanId() : null,
                 saved.getTanggalPengajuan(),
                 saved.getTanggalReview(),

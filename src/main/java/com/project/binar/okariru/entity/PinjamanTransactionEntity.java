@@ -51,6 +51,9 @@ public class PinjamanTransactionEntity {
     @Column(name = "last_update")
     private LocalDate lastUpdate;
 
+    @Column(name = "kode_transaksi", unique = true)
+    private String kodeTransaksi;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "last_update_by_id", referencedColumnName = "employee_id")
     private EmployeEntity lastUpdateBy;
