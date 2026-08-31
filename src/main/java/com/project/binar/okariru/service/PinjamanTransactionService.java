@@ -2,13 +2,18 @@ package com.project.binar.okariru.service;
 
 import com.project.binar.okariru.dto.PinjamanTransactionServiceRequest;
 import com.project.binar.okariru.dto.PinjamanTransactionServiceResponse;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public interface PinjamanTransactionService {
 
-    List<PinjamanTransactionServiceResponse.getPinjamanTransactionResponse> getAllPinjamanTransaction();
+//    List<PinjamanTransactionServiceResponse.getPinjamanTransactionResponse> getAllPinjamanTransaction();
+
+
+    Page<PinjamanTransactionServiceResponse.getPinjamanTransactionResponse> findAll(String status, String keyword, int page, int size);
+
 
     PinjamanTransactionServiceResponse.getPinjamanTransactionResponse getPinjamanTransactionById(Integer id);
 

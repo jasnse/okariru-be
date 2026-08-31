@@ -91,11 +91,11 @@ public class SecurityConfig {
 
                         // ===== TRANSAKSI PINJAMAN =====
                         .requestMatchers(HttpMethod.POST, "/api/v1/pinjaman/transaction/**")
-                            .hasAnyRole( "MARKETING", "CUSTOMER")
+                            .hasAnyRole( "MARKETING", "CUSTOMER", "SUPERADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/pinjaman/transaction/**")
-                            .hasAnyRole( "MARKETING","BRANCH_MANAGER", "BACKOFFICE")
+                            .hasAnyRole( "MARKETING","BRANCH_MANAGER", "BACKOFFICE", "SUPERADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/pinjaman/transaction/**")
-                            .hasAnyRole("MARKETING", "BRANCH_MANAGER", "BACKOFFICE", "CUSTOMER")
+                            .hasAnyRole("MARKETING", "BRANCH_MANAGER", "BACKOFFICE", "CUSTOMER", "SUPERADMIN")
 
                         // ===== ANGSURAN  =====
                         .requestMatchers(HttpMethod.GET, "/api/v1/angsuran")
@@ -107,9 +107,9 @@ public class SecurityConfig {
 
                         // ===== DOKUMEN  =====
                         .requestMatchers(HttpMethod.GET, "/api/v1/document")
-                            .hasAnyRole("MARKETING", "BRANCH_MANAGER", "BACKOFFICE")
+                            .hasAnyRole("SUPERADMIN","MARKETING", "BRANCH_MANAGER", "BACKOFFICE")
                         .requestMatchers(HttpMethod.POST, "/api/v1/document")
-                            .hasAnyRole("CUSTOMER")
+                            .hasAnyRole("SUPERADMIN","CUSTOMER")
 
 
                         //set up employee and permission
