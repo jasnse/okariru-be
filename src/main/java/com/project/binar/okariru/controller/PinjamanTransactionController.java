@@ -54,8 +54,8 @@ public class PinjamanTransactionController {
             @Valid @RequestBody PinjamanTransactionServiceRequest.pinjamanTransactionUpdateRequest request
     ) {
         pinjamanTransactionService.updatePinjamanTransaction(id, request.customerId, request.pinjamanId,
-                request.nominalPinjaman, request.statusPengajuan, request.tanggalReview, request.tanggalApproval,
-                request.noteApproval, request.rejectNote, request.lastUpdateBy);
+                request.nominalPinjaman, request.tenor, request.statusPengajuan, request.tanggalReview, request.tanggalApproval,
+                request.noteMarketing, request.noteBm, request.noteBackOffice, request.lastUpdateBy);
 
         PinjamanTransactionServiceResponse.pinjamanTransactionUpdateResponse respUpdate = new PinjamanTransactionServiceResponse.pinjamanTransactionUpdateResponse();
         respUpdate.setMessage("Pinjaman Transaction Berhasil di update");

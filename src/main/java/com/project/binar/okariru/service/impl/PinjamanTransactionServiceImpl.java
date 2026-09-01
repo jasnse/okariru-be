@@ -72,9 +72,11 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
                 pinjamanTrx.getTanggalReview(),
                 pinjamanTrx.getTanggalApproval(),
                 pinjamanTrx.getNominalPinjaman(),
+                pinjamanTrx.getTenor(),
                 pinjamanTrx.getStatusPengajuan(),
-                pinjamanTrx.getNoteApproval(),
-                pinjamanTrx.getRejectNote(),
+                pinjamanTrx.getNoteMarketing(),
+                pinjamanTrx.getNoteBm(),
+                pinjamanTrx.getNoteBackOffice(),
                 pinjamanTrx.getLastUpdate(),
                 pinjamanTrx.getLastUpdateBy() != null ? pinjamanTrx.getLastUpdateBy().getEmployeeId(): null
 
@@ -96,9 +98,11 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
                 trx.getTanggalReview(),
                 trx.getTanggalApproval(),
                 trx.getNominalPinjaman(),
+                trx.getTenor(),
                 trx.getStatusPengajuan(),
-                trx.getNoteApproval(),
-                trx.getRejectNote(),
+                trx.getNoteMarketing(),
+                trx.getNoteBm(),
+                trx.getNoteBackOffice(),
                 trx.getLastUpdate(),
                 trx.getLastUpdateBy() != null ? trx.getLastUpdateBy().getEmployeeId() : null
         );
@@ -113,6 +117,7 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
         PinjamanTransactionEntity trx = new PinjamanTransactionEntity();
         trx.setCustomer(customer);
         trx.setNominalPinjaman(addRequest.nominalPinjaman);
+        trx.setTenor(addRequest.tenor);
         trx.setTanggalPengajuan(LocalDate.now());
         trx.setStatusPengajuan("Pengajuan");
 
@@ -123,6 +128,7 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
         }
 
         PinjamanTransactionEntity saved = pinjamanTransactionRepository.save(trx);
+
         saved.setKodeTransaksi(String.format("TRX-%d-%05d", LocalDate.now().getYear(), trx.getTransPinjamanId()));
 
         saved = pinjamanTransactionRepository.save(saved);
@@ -137,9 +143,11 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
                 saved.getTanggalReview(),
                 saved.getTanggalApproval(),
                 saved.getNominalPinjaman(),
+                saved.getTenor(),
                 saved.getStatusPengajuan(),
-                saved.getNoteApproval(),
-                saved.getRejectNote(),
+                saved.getNoteMarketing(),
+                saved.getNoteBm(),
+                saved.getNoteBackOffice(),
                 saved.getLastUpdate(),
                 saved.getLastUpdateBy() != null ? saved.getLastUpdateBy().getEmployeeId() : null
         );
@@ -147,9 +155,9 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
 
     @Override
     @Transactional
-    public void updatePinjamanTransaction(Integer id, Integer customerId, Integer pinjamanId, Integer nominalPinjaman,
+    public void updatePinjamanTransaction(Integer id, Integer customerId, Integer pinjamanId, Integer nominalPinjaman, Integer tenor,
                                            String statusPengajuan, LocalDate tanggalReview, LocalDate tanggalApproval,
-                                           String noteApproval, String rejectNote, Integer lastUpdateBy) {
+                                           String noteMarketing, String noteBm, String noteBackOffice, Integer lastUpdateBy) {
         Optional<PinjamanTransactionEntity> trxOpt = pinjamanTransactionRepository.findById(id);
 
         if (trxOpt.isEmpty()) {
@@ -162,11 +170,13 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
         PinjamanTransactionEntity trxUpdate = trxOpt.get();
         trxUpdate.setCustomer(customer);
         trxUpdate.setNominalPinjaman(nominalPinjaman);
+        trxUpdate.setTenor(tenor);
         trxUpdate.setStatusPengajuan(statusPengajuan);
         trxUpdate.setTanggalReview(tanggalReview);
         trxUpdate.setTanggalApproval(tanggalApproval);
-        trxUpdate.setNoteApproval(noteApproval);
-        trxUpdate.setRejectNote(rejectNote);
+        trxUpdate.setNoteMarketing(noteMarketing);
+        trxUpdate.setNoteBm(noteBm);
+        trxUpdate.setNoteBackOffice(noteBackOffice);
         trxUpdate.setLastUpdate(LocalDate.now());
 
         if (pinjamanId != null) {

@@ -39,14 +39,20 @@ public class PinjamanTransactionEntity {
     @Column(name = "nominal_pinjaman")
     private Integer nominalPinjaman;
 
+    @Column(name = "tenor")
+    private Integer tenor;
+
     @Column(name = "status_pengajuan")
     private String statusPengajuan;
 
-    @Column(name = "note_approval")
-    private String noteApproval;
+    @Column(name = "note_marketing")
+    private String noteMarketing;
 
-    @Column(name = "reject_note")
-    private String rejectNote;
+    @Column(name = "note_bm")
+    private String noteBm;
+
+    @Column(name = "note_backoffice")
+    private String noteBackOffice;
 
     @Column(name = "last_update")
     private LocalDate lastUpdate;

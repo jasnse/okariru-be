@@ -21,9 +21,11 @@ public class PinjamanTransactionServiceResponse {
         LocalDate tanggalReview;
         LocalDate tanggalApproval;
         Integer nominalPinjaman;
+        Integer tenor;
         String statusPengajuan;
-        String noteApproval;
-        String rejectNote;
+        String noteMarketing;
+        String noteBm;
+        String noteBackOffice;
         LocalDate lastUpdate;
         Integer lastUpdateBy;
     }

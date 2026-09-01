@@ -19,9 +19,9 @@ public interface PinjamanTransactionService {
 
     PinjamanTransactionServiceResponse.getPinjamanTransactionResponse addPinjamanTransaction(PinjamanTransactionServiceRequest.pinjamanTransactionAddRequest addRequest);
 
-    void updatePinjamanTransaction(Integer id, Integer customerId, Integer pinjamanId, Integer nominalPinjaman,
+    void updatePinjamanTransaction(Integer id, Integer customerId, Integer pinjamanId, Integer nominalPinjaman, Integer tenor,
                                     String statusPengajuan, LocalDate tanggalReview, LocalDate tanggalApproval,
-                                    String noteApproval, String rejectNote, Integer lastUpdateBy);
+                                   String noteMarketing, String noteBm, String noteBackOffice, Integer lastUpdateBy);
 
     String deletePinjamanTransaction(Integer id);
 }
