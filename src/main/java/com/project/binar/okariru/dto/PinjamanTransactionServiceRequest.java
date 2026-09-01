@@ -12,6 +12,7 @@ public class PinjamanTransactionServiceRequest {
         public Integer pinjamanId;
         @NotNull(message = "nominal pinjaman harus diisi")
         public Integer nominalPinjaman;
+        public Integer tenor;
     }
 
     public static class pinjamanTransactionUpdateRequest {
@@ -19,11 +20,13 @@ public class PinjamanTransactionServiceRequest {
         public Integer customerId;
         public Integer pinjamanId;
         public Integer nominalPinjaman;
+        public Integer tenor;
         public String statusPengajuan;
         public LocalDate tanggalReview;
         public LocalDate tanggalApproval;
-        public String noteApproval;
-        public String rejectNote;
+        public String noteMarketing;
+        public String noteBm;
+        public String noteBackOffice;
         public Integer lastUpdateBy;
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
@@ -46,6 +47,16 @@ public class SecurityConfig {
                     : "Unauthorized - silakan login terlebih dahulu";
 
             response.getWriter().write("{\"message\": \"" + message + "\"}");
+        };
+    }
+
+
+    @Bean
+    AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, accessDeniedException) -> {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"message\": \"Anda tidak memiliki akses untuk melakukan aksi ini\"}");
         };
     }
 
@@ -97,6 +108,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/pinjaman/transaction/**")
                             .hasAnyRole("MARKETING", "BRANCH_MANAGER", "BACKOFFICE", "CUSTOMER", "SUPERADMIN")
 
+                        .requestMatchers(HttpMethod.GET, "/api/v1/customer/**").hasAnyRole("MARKETING","BRANCH_MANAGER", "BACKOFFICE", "SUPERADMIN")
+
                         // ===== ANGSURAN  =====
                         .requestMatchers(HttpMethod.GET, "/api/v1/angsuran")
                             .hasAnyRole("CUSTOMER")
@@ -134,7 +147,8 @@ public class SecurityConfig {
 
                 )
                 .exceptionHandling(handling -> handling
-                        .authenticationEntryPoint(unauthorizedEntryPoint()))
+                        .authenticationEntryPoint(unauthorizedEntryPoint())
+                        .accessDeniedHandler(accessDeniedHandler()))
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .sessionManagement(session -> session

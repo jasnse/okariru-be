@@ -78,7 +78,7 @@ public class DocumentServiceImpl implements DocumentService {
                     String fileUrl = ServletUriComponentsBuilder
                             .fromCurrentContextPath()          // http://localhost:8080
                             .path("/api/v1/document/download")  // + endpoint download
-                            .queryParam("pathfile", doc.getPathfile())
+                            .queryParam("pathfile", doc.getPathfile()) // pathfile=UUID_namaAsli.jpg
                             .toUriString();
 
                     return new DocumentResponse.getDocumentResponse(
