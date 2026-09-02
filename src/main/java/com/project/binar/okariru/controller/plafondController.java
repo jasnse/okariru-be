@@ -22,6 +22,13 @@ public class PlafondController {
         return ResponseEntity.ok(plafondService.getAllPlafond());
     }
 
+    //get plafond by customer id (dipakai di modal detail plafond per-customer)
+    @GetMapping(params = "userId")
+    public ResponseEntity<PlafondResponse.getPlafondResponse> getPlafondByCustomerId(
+            @RequestParam Integer userId) {
+        return ResponseEntity.ok(plafondService.getPlafondByCustomerId(userId));
+    }
+
     //get plafond by Id
     @GetMapping(headers = "idPlafondSearch")
     public ResponseEntity<PlafondResponse.getPlafondResponse> getPlafondById(

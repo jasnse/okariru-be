@@ -3,14 +3,17 @@ package com.project.binar.okariru.service.impl;
 import com.project.binar.okariru.dto.PinjamanResponse;
 import com.project.binar.okariru.dto.PinjamanTransactionServiceRequest;
 import com.project.binar.okariru.dto.PinjamanTransactionServiceResponse;
+import com.project.binar.okariru.entity.AppUser;
 import com.project.binar.okariru.entity.CustomerEntity;
 import com.project.binar.okariru.entity.EmployeEntity;
 import com.project.binar.okariru.entity.PinjamanEntity;
 import com.project.binar.okariru.entity.PinjamanTransactionEntity;
+import com.project.binar.okariru.entity.PlafondEntity;
 import com.project.binar.okariru.repository.CustomerRepository;
 import com.project.binar.okariru.repository.EmployeRepository;
 import com.project.binar.okariru.repository.PinjamanRepository;
 import com.project.binar.okariru.repository.PinjamanTransactionRepository;
+import com.project.binar.okariru.repository.PlafondRepository;
 import com.project.binar.okariru.service.PinjamanTransactionService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -19,6 +22,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -33,6 +38,7 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
     private final CustomerRepository customerRepository;
     private final PinjamanRepository pinjamanRepository;
     private final EmployeRepository employeRepository;
+    private final PlafondRepository plafondRepository;
 
 //    @Override
 //    public List<PinjamanTransactionServiceResponse.getPinjamanTransactionResponse> getAllPinjamanTransaction() {
@@ -113,6 +119,21 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
     public PinjamanTransactionServiceResponse.getPinjamanTransactionResponse addPinjamanTransaction(PinjamanTransactionServiceRequest.pinjamanTransactionAddRequest addRequest) {
         CustomerEntity customer = customerRepository.findById(addRequest.customerId)
                 .orElseThrow(() -> new EntityNotFoundException("Customer dengan id " + addRequest.customerId + " tidak ditemukan"));
+        
+        Optional<PlafondEntity> plafondOpt = plafondRepository.findByUser_CustomerId(addRequest.customerId);
+
+        if (plafondOpt.isPresent()) {
+            PlafondEntity plafond = plafondOpt.get();
+            long totalPlafond = plafond.getTotalPlafond() != null ? plafond.getTotalPlafond() : 0;
+            long totalPinjamanDisetujui = pinjamanTransactionRepository
+                    .sumNominalPinjamanDisetujuiByCustomer(addRequest.customerId);
+            long sisaPlafond = totalPlafond - totalPinjamanDisetujui;
+
+            if (addRequest.nominalPinjaman > sisaPlafond) {
+                throw new IllegalArgumentException(
+                        "Nominal pinjaman melebihi sisa plafond Anda (sisa plafond: " + sisaPlafond + ")");
+            }
+        }
 
         PinjamanTransactionEntity trx = new PinjamanTransactionEntity();
         trx.setCustomer(customer);
@@ -124,6 +145,7 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
         if (addRequest.pinjamanId != null) {
             PinjamanEntity pinjaman = pinjamanRepository.findById(addRequest.pinjamanId)
                     .orElseThrow(() -> new EntityNotFoundException("Pinjaman dengan id " + addRequest.pinjamanId + " tidak ditemukan"));
+
             trx.setPinjaman(pinjaman);
         }
 
@@ -153,11 +175,40 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
         );
     }
 
+        //ambil role dari JWT yang sedang aktif -> untuk validasi status yang boleh proceed pinjaman
+    private void validateStatusTransition(String statusPengajuan) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!(principal instanceof AppUser appUser)) {
+            return;
+        }
+
+        String role = appUser.getRole();
+        if ("SUPERADMIN".equals(role)) {
+            return;
+        }
+
+        if(role == null) {
+            throw new AccessDeniedException("Sesi Invalid: Harap Login Kembali");
+        }
+
+        if ("Direview".equals(statusPengajuan) && !"MARKETING".equals(role)) {
+            throw new AccessDeniedException("Cuma role MARKETING yang boleh submit review pengajuan");
+        }
+
+        if (("Disetujui".equals(statusPengajuan) || "Ditolak".equals(statusPengajuan)) && !"BRANCH_MANAGER".equals(role)) {
+            throw new AccessDeniedException("Cuma role BRANCH_MANAGER yang boleh approve/reject pengajuan");
+        }
+    }
+
     @Override
     @Transactional
     public void updatePinjamanTransaction(Integer id, Integer customerId, Integer pinjamanId, Integer nominalPinjaman, Integer tenor,
                                            String statusPengajuan, LocalDate tanggalReview, LocalDate tanggalApproval,
-                                           String noteMarketing, String noteBm, String noteBackOffice, Integer lastUpdateBy) {
+                                           String noteMarketing, String noteBm, String noteBackOffice, Integer lastUpdateBy)
+        {
+
+        validateStatusTransition(statusPengajuan);
+
         Optional<PinjamanTransactionEntity> trxOpt = pinjamanTransactionRepository.findById(id);
 
         if (trxOpt.isEmpty()) {

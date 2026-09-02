@@ -5,10 +5,9 @@ import com.project.binar.okariru.dto.CustomerResponse;
 import com.project.binar.okariru.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/customer")
@@ -16,10 +15,14 @@ import java.util.List;
 public class CustomerController {
     private final CustomerService customerService;
 
-    //get all customer
+    //get all customer with pagination
     @GetMapping
-    public ResponseEntity<List<CustomerResponse.getCustomerResponse>> findAll() {
-        return ResponseEntity.ok(customerService.getAllCustomer());
+    public ResponseEntity<Page<CustomerResponse.getCustomerResponse>> findAll(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ){
+        return ResponseEntity.ok(customerService.findAll(keyword, page, size));
     }
 
     //get customer by Id
