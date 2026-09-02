@@ -15,6 +15,7 @@ public class PlafondResponse {
         Integer plafondId;
         Integer userId;
         Integer totalPlafond;
+        Long sisaPlafond;
         String deskripsiPlafond;
         Integer createdBy;
         LocalDate createdAt;

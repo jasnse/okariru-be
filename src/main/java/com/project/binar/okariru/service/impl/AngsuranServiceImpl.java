@@ -196,9 +196,10 @@ public class AngsuranServiceImpl implements AngsuranService {
             }
 
             if (deposit >= angsuran.getSisaTagihan()) {
+                int tagihanSebelumnya = angsuran.getSisaTagihan();
                 angsuran.setSisaTagihan(0);
                 angsuran.setStatusAngsuran("Lunas");
-                deposit -= angsuran.getSisaTagihan();
+                deposit -= tagihanSebelumnya;
                 jumlahLunas++;
             } else {
                 angsuran.setSisaTagihan(angsuran.getSisaTagihan() - deposit);
@@ -207,6 +208,14 @@ public class AngsuranServiceImpl implements AngsuranService {
             }
 
             angsuranRepository.save(angsuran);
+        }
+
+        // kalau semua angsuran udah lunas, pinjaman_transaction-nya ikut ditandai Lunas
+        // (otomatis bikin sisa plafond customer ini pulih, karena hitungSisaPlafond cuma ngitung yang statusnya "Disetujui")
+        boolean semuaAngsuranLunas = angsuranList.stream().allMatch(a -> a.getSisaTagihan() <= 0);
+        if (semuaAngsuranLunas) {
+            transPinjaman.setStatusPengajuan("Lunas");
+            pinjamanTransactionRepository.save(transPinjaman);
         }
 
         AngsuranResponse.angsuranBayarResponse resp = new AngsuranResponse.angsuranBayarResponse();

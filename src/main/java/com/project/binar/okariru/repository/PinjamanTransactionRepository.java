@@ -15,4 +15,9 @@ public interface PinjamanTransactionRepository extends JpaRepository<PinjamanTra
             "(:status IS NULL OR pt.statusPengajuan = :status) AND " +
             "(:keyword IS NULL OR LOWER(pt.kodeTransaksi) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<PinjamanTransactionEntity> searchPinjamanTrx(@Param("status") String status, @Param("keyword") String keyword, Pageable pageable);
+
+    // total nominal pinjaman yang sudah disetujui milik satu customer, dipakai buat hitung sisa plafond
+    @Query("SELECT COALESCE(SUM(pt.nominalPinjaman), 0) FROM PinjamanTransactionEntity pt WHERE " +
+            "pt.customer.customerId = :customerId AND pt.statusPengajuan = 'Disetujui'")
+    long sumNominalPinjamanDisetujuiByCustomer(@Param("customerId") Integer customerId);
 }

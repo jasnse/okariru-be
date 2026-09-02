@@ -3,11 +3,16 @@ package com.project.binar.okariru.service.impl;
 import com.project.binar.okariru.dto.CustomerRequest;
 import com.project.binar.okariru.dto.CustomerResponse;
 import com.project.binar.okariru.entity.CustomerEntity;
+import com.project.binar.okariru.entity.PlafondEntity;
 import com.project.binar.okariru.repository.CustomerRepository;
+import com.project.binar.okariru.repository.PlafondRepository;
 import com.project.binar.okariru.service.CustomerService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,30 +25,34 @@ import java.util.Optional;
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final PlafondRepository plafondRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private static final int DEFAULT_PLAFOND = 10_000_000;
+
     @Override
-    public List<CustomerResponse.getCustomerResponse> getAllCustomer() {
-        return customerRepository.findAll()
-                .stream()
-                .map(customer -> new CustomerResponse.getCustomerResponse(
-                        customer.getCustomerId(),
-                        customer.getUserName(),
-                        customer.getSidName(),
-                        customer.getNik(),
-                        customer.getTempatLahir(),
-                        customer.getTanggalLahir(),
-                        customer.getAlamat(),
-                        customer.getPekerjaan(),
-                        customer.getPendapatan(),
-                        customer.getMaritalStatus(),
-                        customer.getGender(),
-                        customer.getNoRekening(),
-                        customer.getCreatedAt(),
-                        customer.getUpdatedAt(),
-                        customer.getRoleCustomer()
-                ))
-                .toList();
+    public Page<CustomerResponse.getCustomerResponse> findAll(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<CustomerEntity> customerPage = customerRepository.searchCustomer(keyword, pageable);
+
+        return customerPage.map(customer -> new CustomerResponse.getCustomerResponse(
+                customer.getCustomerId(),
+                customer.getUserName(),
+                customer.getSidName(),
+                customer.getNik(),
+                customer.getTempatLahir(),
+                customer.getTanggalLahir(),
+                customer.getAlamat(),
+                customer.getPekerjaan(),
+                customer.getPendapatan(),
+                customer.getMaritalStatus(),
+                customer.getGender(),
+                customer.getNoRekening(),
+                customer.getCreatedAt(),
+                customer.getUpdatedAt(),
+                customer.getRoleCustomer()
+        ));
     }
 
     @Override
@@ -70,6 +79,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public CustomerResponse.getCustomerResponse addCustomer(CustomerRequest.customerAddRequest addRequest) {
         if (customerRepository.existsByUserName(addRequest.userName)) {
             throw new IllegalArgumentException("Username " + addRequest.userName + " sudah terdaftar");
@@ -102,6 +112,15 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setRoleCustomer("CUSTOMER");
 
         CustomerEntity saved = customerRepository.save(customer);
+
+        // tiap customer baru otomatis dikasih plafond default
+        PlafondEntity plafond = new PlafondEntity();
+        plafond.setUser(saved);
+        plafond.setTotalPlafond(DEFAULT_PLAFOND);
+        plafond.setDeskripsiPlafond("Plafond default customer baru");
+        plafond.setCreatedAt(LocalDate.now());
+        plafondRepository.save(plafond);
+
         return new CustomerResponse.getCustomerResponse(
                 saved.getCustomerId(),
                 saved.getUserName(),

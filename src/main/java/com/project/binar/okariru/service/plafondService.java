@@ -11,6 +11,8 @@ public interface PlafondService {
 
     PlafondResponse.getPlafondResponse getPlafondById(Integer id);
 
+    PlafondResponse.getPlafondResponse getPlafondByCustomerId(Integer customerId);
+
     PlafondResponse.getPlafondResponse addPlafond(PlafondRequest.plafondAddRequest addRequest);
 
     void updatePlafond(Integer id, Integer userId, Integer totalPlafond, String deskripsiPlafond, Integer updatedBy);

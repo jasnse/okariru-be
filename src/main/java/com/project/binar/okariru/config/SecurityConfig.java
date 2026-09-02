@@ -94,10 +94,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE,"/api/v1/pinjaman").hasAnyRole("SUPERADMIN", "BACKOFFICE")
 
                         // ===== PLAFOND =====
-                        .requestMatchers(HttpMethod.POST,"/api/v1/plafond").hasRole("BACKOFFICE")
-                        .requestMatchers(HttpMethod.PUT,"/api/v1/plafond").hasRole("BACKOFFICE")
+                        .requestMatchers(HttpMethod.POST,"/api/v1/plafond").hasAnyRole("BACKOFFICE", "SUPERADMIN")
+                        .requestMatchers(HttpMethod.PUT,"/api/v1/plafond").hasAnyRole("BACKOFFICE", "SUPERADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/plafond")
-                            .hasAnyRole("BACKOFFICE", "CUSTOMER")
+                            .hasAnyRole("SUPERADMIN", "BACKOFFICE", "CUSTOMER")
                         .requestMatchers(HttpMethod.DELETE,"/api/v1/plafond").hasRole("BACKOFFICE")
 
                         // ===== TRANSAKSI PINJAMAN =====

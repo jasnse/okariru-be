@@ -7,6 +7,7 @@ import com.project.binar.okariru.entity.EmployeEntity;
 import com.project.binar.okariru.entity.PlafondEntity;
 import com.project.binar.okariru.repository.CustomerRepository;
 import com.project.binar.okariru.repository.EmployeRepository;
+import com.project.binar.okariru.repository.PinjamanTransactionRepository;
 import com.project.binar.okariru.repository.PlafondRepository;
 import com.project.binar.okariru.service.PlafondService;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,6 +26,15 @@ public class PlafondServiceImpl implements PlafondService {
     private final PlafondRepository plafondRepository;
     private final CustomerRepository customerRepository;
     private final EmployeRepository employeRepository;
+    private final PinjamanTransactionRepository pinjamanTransactionRepository;
+
+    // sisa plafond = total plafond - total nominal pinjaman customer itu yang sudah Disetujui
+    private long hitungSisaPlafond(PlafondEntity plafond) {
+        long totalPinjamanDisetujui = pinjamanTransactionRepository
+                .sumNominalPinjamanDisetujuiByCustomer(plafond.getUser().getCustomerId());
+        long totalPlafond = plafond.getTotalPlafond() != null ? plafond.getTotalPlafond() : 0;
+        return totalPlafond - totalPinjamanDisetujui;
+    }
 
     @Override
     public List<PlafondResponse.getPlafondResponse> getAllPlafond() {
@@ -34,6 +44,7 @@ public class PlafondServiceImpl implements PlafondService {
                         plafond.getPlafondId(),
                         plafond.getUser().getCustomerId(),
                         plafond.getTotalPlafond(),
+                        hitungSisaPlafond(plafond),
                         plafond.getDeskripsiPlafond(),
                         plafond.getCreatedBy() != null ? plafond.getCreatedBy().getEmployeeId() : null,
                         plafond.getCreatedAt(),
@@ -51,6 +62,24 @@ public class PlafondServiceImpl implements PlafondService {
                 plafond.getPlafondId(),
                 plafond.getUser().getCustomerId(),
                 plafond.getTotalPlafond(),
+                hitungSisaPlafond(plafond),
+                plafond.getDeskripsiPlafond(),
+                plafond.getCreatedBy() != null ? plafond.getCreatedBy().getEmployeeId() : null,
+                plafond.getCreatedAt(),
+                plafond.getUpdatedBy() != null ? plafond.getUpdatedBy().getEmployeeId() : null,
+                plafond.getUpdatedAt()
+        );
+    }
+
+    @Override
+    public PlafondResponse.getPlafondResponse getPlafondByCustomerId(Integer customerId) {
+        PlafondEntity plafond = plafondRepository.findByUser_CustomerId(customerId)
+                .orElseThrow(() -> new EntityNotFoundException("Plafond untuk customer dengan Id " + customerId + " tidak ditemukan"));
+        return new PlafondResponse.getPlafondResponse(
+                plafond.getPlafondId(),
+                plafond.getUser().getCustomerId(),
+                plafond.getTotalPlafond(),
+                hitungSisaPlafond(plafond),
                 plafond.getDeskripsiPlafond(),
                 plafond.getCreatedBy() != null ? plafond.getCreatedBy().getEmployeeId() : null,
                 plafond.getCreatedAt(),
@@ -82,6 +111,7 @@ public class PlafondServiceImpl implements PlafondService {
                 saved.getPlafondId(),
                 saved.getUser().getCustomerId(),
                 saved.getTotalPlafond(),
+                hitungSisaPlafond(saved),
                 saved.getDeskripsiPlafond(),
                 saved.getCreatedBy() != null ? saved.getCreatedBy().getEmployeeId() : null,
                 saved.getCreatedAt(),
