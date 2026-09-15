@@ -59,7 +59,8 @@ public class AppUserDetailsService implements UserDetailsService {
         return new AppUser(
                 karyawan.getUserName(),
                 karyawan.getPassword(),
-                pickRole
+                pickRole,
+                null
         );
     }
 
@@ -67,7 +68,8 @@ public class AppUserDetailsService implements UserDetailsService {
         return new AppUser(
                 customer.getUserName(),
                 customer.getPassword(),
-                customer.getRoleCustomer()
+                customer.getRoleCustomer(),
+                customer.getCustomerId()
         );
     }
 }

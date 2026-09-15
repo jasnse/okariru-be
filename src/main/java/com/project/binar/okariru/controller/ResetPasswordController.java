@@ -1,5 +1,6 @@
 package com.project.binar.okariru.controller;
 
+import com.project.binar.okariru.dto.CustomerResponse;
 import com.project.binar.okariru.dto.ResetPasswordDTO;
 import com.project.binar.okariru.service.CustomerService;
 import com.project.binar.okariru.service.jwtAuth.OtpService;
@@ -48,8 +49,11 @@ public class ResetPasswordController {
                     .body("Akses Ditolak! Anda belum memvalidasi OTP atau sesi Anda telah berakhir.");
         }
 
-        customerService.resetPasswordCustomer(request.getCustomerId(), request.getNewPassword());
+        //get customerId by Email
+        CustomerResponse.getCustomerResponse customer = customerService.getCustomerByEmail(email);
 
+        //resetPassword
+        customerService.resetPasswordCustomer(customer.getCustomerId(), request.getNewPassword());
         otpService.deleteResetToken(resetToken);
 
         return ResponseEntity.ok("Password berhasil diubah. Silakan login kembali.");
