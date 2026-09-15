@@ -45,4 +45,17 @@ public class CustomerRequest {
         public String gender;
         public String noRekening;
     }
+
+    // customer buat edit profil sendiri (PUT /api/v1/customer/me) --
+    public static class customerSelfUpdateRequest {
+        public String sidName;
+        public String alamat;
+        public String pekerjaan;
+        public Integer pendapatan;
+        public String maritalStatus;
+        public String noRekening;
+        public String tempatLahir;
+        public LocalDate tanggalLahir;
+        public String gender;
+    }
 }

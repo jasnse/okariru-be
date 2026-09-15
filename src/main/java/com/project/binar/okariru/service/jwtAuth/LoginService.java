@@ -26,7 +26,7 @@ public class LoginService {
         }
 
         String token = jwtService.issue(user, Instant.now());
-        return new LoginDTO.loginResponse(user.getUsername(), user.getRole(), token);
+        return new LoginDTO.loginResponse(user.getUsername(), user.getRole(), token, user.getUserId());
     }
 
     public LoginDTO.loginResponse loginCustomer(LoginDTO.loginRequest reqlog){
@@ -38,7 +38,7 @@ public class LoginService {
         }
 
         String token = jwtService.issue(customer, Instant.now());
-        return new LoginDTO.loginResponse(customer.getUsername(), customer.getRole(), token);
+        return new LoginDTO.loginResponse(customer.getUsername(), customer.getRole(), token, customer.getUserId());
 
     }
 }

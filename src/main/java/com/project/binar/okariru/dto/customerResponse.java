@@ -15,6 +15,7 @@ public class CustomerResponse {
         Integer customerId;
         String userName;
         String sidName;
+        String email;
         String nik;
         String tempatLahir;
         LocalDate tanggalLahir;

@@ -108,7 +108,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/pinjaman/transaction/**")
                             .hasAnyRole("MARKETING", "BRANCH_MANAGER", "BACKOFFICE", "CUSTOMER", "SUPERADMIN")
 
-                        .requestMatchers(HttpMethod.GET, "/api/v1/customer/**").hasAnyRole("MARKETING","BRANCH_MANAGER", "BACKOFFICE", "SUPERADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/customer/**").hasAnyRole("MARKETING","BRANCH_MANAGER", "BACKOFFICE", "SUPERADMIN", "CUSTOMER")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/customer/me").hasRole("CUSTOMER")
 
                         // ===== ANGSURAN  =====
                         .requestMatchers(HttpMethod.GET, "/api/v1/angsuran")

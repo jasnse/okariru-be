@@ -52,7 +52,7 @@ public class OtpService {
         } else
             return null;
     }
-
+    //buat get email -> email untuk get cust info (cust ID nya)
     public String getEmailByResetToken(String resetToken) {
         return redisTemplate.opsForValue().get("RESET_TOKEN_" + resetToken);
     }

@@ -40,6 +40,7 @@ public class CustomerServiceImpl implements CustomerService {
                 customer.getCustomerId(),
                 customer.getUserName(),
                 customer.getSidName(),
+                customer.getEmail(),
                 customer.getNik(),
                 customer.getTempatLahir(),
                 customer.getTanggalLahir(),
@@ -63,6 +64,30 @@ public class CustomerServiceImpl implements CustomerService {
                 customer.getCustomerId(),
                 customer.getUserName(),
                 customer.getSidName(),
+                customer.getEmail(),
+                customer.getNik(),
+                customer.getTempatLahir(),
+                customer.getTanggalLahir(),
+                customer.getAlamat(),
+                customer.getPekerjaan(),
+                customer.getPendapatan(),
+                customer.getMaritalStatus(),
+                customer.getGender(),
+                customer.getNoRekening(),
+                customer.getCreatedAt(),
+                customer.getUpdatedAt(),
+                customer.getRoleCustomer()
+        );
+    }
+
+    public CustomerResponse.getCustomerResponse getCustomerByEmail(String email) {
+        CustomerEntity customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Customer dengan email " + email + " tidak ditemukan"));
+        return new CustomerResponse.getCustomerResponse(
+                customer.getCustomerId(),
+                customer.getUserName(),
+                customer.getSidName(),
+                customer.getEmail(),
                 customer.getNik(),
                 customer.getTempatLahir(),
                 customer.getTanggalLahir(),
@@ -125,6 +150,7 @@ public class CustomerServiceImpl implements CustomerService {
                 saved.getCustomerId(),
                 saved.getUserName(),
                 saved.getSidName(),
+                saved.getEmail(),
                 saved.getNik(),
                 saved.getTempatLahir(),
                 saved.getTanggalLahir(),
@@ -194,6 +220,31 @@ public class CustomerServiceImpl implements CustomerService {
         customerUpdate.setNoRekening(noRekening);
         customerUpdate.setUpdatedAt(LocalDate.now());
         customerRepository.save(customerUpdate);
+    }
+
+    @Override
+    @Transactional
+    public void updateOwnProfile(Integer id, String sidName, String alamat, String pekerjaan, Integer pendapatan,
+                                  String maritalStatus, String noRekening, String tempatLahir, LocalDate tanggalLahir, String gender) {
+        CustomerEntity customer = customerRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("customer id tidak ditemukan"));
+
+        if (noRekening != null && customerRepository.existsByNoRekeningAndCustomerIdNot(noRekening, id)) {
+            throw new IllegalArgumentException("No rekening " + noRekening + " sudah dipakai customer lain");
+        }
+
+        customer.setSidName(sidName);
+        customer.setAlamat(alamat);
+        customer.setPekerjaan(pekerjaan);
+        customer.setPendapatan(pendapatan);
+        customer.setMaritalStatus(maritalStatus);
+        customer.setNoRekening(noRekening);
+        customer.setTempatLahir(tempatLahir);
+        customer.setTanggalLahir(tanggalLahir);
+        customer.setGender(gender);
+        customer.setUpdatedAt(LocalDate.now());
+
+        customerRepository.save(customer);
     }
 
     @Override

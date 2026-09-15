@@ -13,6 +13,8 @@ public interface CustomerService {
 
     CustomerResponse.getCustomerResponse getCustomerById(Integer id);
 
+    CustomerResponse.getCustomerResponse getCustomerByEmail(String email);
+
     CustomerResponse.getCustomerResponse addCustomer(CustomerRequest.customerAddRequest addRequest);
 
     void resetPasswordCustomer(int customerId, String newPassword);
@@ -20,6 +22,10 @@ public interface CustomerService {
     void updateCustomer(Integer id, String userName, String sidName, String email, String password, String nik,
                          String tempatLahir, LocalDate tanggalLahir, String alamat, String pekerjaan,
                          Integer pendapatan, String maritalStatus, String gender, String noRekening);
+
+    // dipakai customer buat edit profil sendiri -- id datang JWT yang login
+    void updateOwnProfile(Integer id, String sidName, String alamat, String pekerjaan, Integer pendapatan,
+                           String maritalStatus, String noRekening, String tempatLahir, LocalDate tanggalLahir, String gender);
 
     String deleteCustomer(Integer id);
 }

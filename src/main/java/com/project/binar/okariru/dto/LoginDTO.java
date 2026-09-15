@@ -14,6 +14,7 @@ public class LoginDTO {
         private String username;
         private String role;
         private String token;
+        private Integer userId;
     }
 
     @Getter

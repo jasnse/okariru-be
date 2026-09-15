@@ -16,6 +16,8 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, Intege
             "(:keyword IS NULL OR LOWER(c.userName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<CustomerEntity> searchCustomer(@Param("keyword") String keyword, Pageable pageable);
 
+    Optional<CustomerEntity> findByEmail(String email);
+
     boolean existsByUserName(String userName);
     boolean existsByEmail(String email);
     boolean existsByNik(String nik);

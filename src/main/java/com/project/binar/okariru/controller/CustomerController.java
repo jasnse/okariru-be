@@ -2,11 +2,14 @@ package com.project.binar.okariru.controller;
 
 import com.project.binar.okariru.dto.CustomerRequest;
 import com.project.binar.okariru.dto.CustomerResponse;
+import com.project.binar.okariru.entity.AppUser;
 import com.project.binar.okariru.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,6 +35,8 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.getCustomerById(id));
     }
 
+
+
     //add customer
     @PostMapping
     public ResponseEntity<CustomerResponse.getCustomerResponse> addCustomer(
@@ -51,6 +56,24 @@ public class CustomerController {
 
         CustomerResponse.customerUpdateResponse respUpdate = new CustomerResponse.customerUpdateResponse();
         respUpdate.setMessage("Customer Berhasil di update");
+        return ResponseEntity.ok(respUpdate);
+    }
+
+    //update profil sendiri (dipakai customer, bukan admin) -- id diambil dari JWT
+    @PutMapping("/me")
+    public ResponseEntity<CustomerResponse.customerUpdateResponse> updateMyProfile(
+            @Valid @RequestBody CustomerRequest.customerSelfUpdateRequest request) {
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!(principal instanceof AppUser appUser) || appUser.getUserId() == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        customerService.updateOwnProfile(appUser.getUserId(), request.sidName, request.alamat, request.pekerjaan,
+                request.pendapatan, request.maritalStatus, request.noRekening, request.tempatLahir, request.tanggalLahir, request.gender);
+
+        CustomerResponse.customerUpdateResponse respUpdate = new CustomerResponse.customerUpdateResponse();
+        respUpdate.setMessage("Profil berhasil diperbarui");
         return ResponseEntity.ok(respUpdate);
     }
 
