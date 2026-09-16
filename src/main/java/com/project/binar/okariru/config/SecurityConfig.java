@@ -113,14 +113,14 @@ public class SecurityConfig {
 
                         // ===== ANGSURAN  =====
                         .requestMatchers(HttpMethod.GET, "/api/v1/angsuran")
-                            .hasAnyRole("CUSTOMER")
+                            .hasAnyRole("CUSTOMER", "SUPERADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/angsuran/generate")
-                            .hasAnyRole("BACKOFFICE")
+                            .hasAnyRole("BACKOFFICE", "SUPERADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/angsuran/bayar")
                         .hasAnyRole("CUSTOMER")
 
                         // ===== DOKUMEN  =====
-                        .requestMatchers(HttpMethod.GET, "/api/v1/document")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/document/**")
                             .hasAnyRole("SUPERADMIN","MARKETING", "BRANCH_MANAGER", "BACKOFFICE")
                         .requestMatchers(HttpMethod.POST, "/api/v1/document")
                             .hasAnyRole("SUPERADMIN","CUSTOMER")

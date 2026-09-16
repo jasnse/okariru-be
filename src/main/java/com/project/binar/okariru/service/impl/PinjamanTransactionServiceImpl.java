@@ -84,10 +84,40 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
                 pinjamanTrx.getNoteBm(),
                 pinjamanTrx.getNoteBackOffice(),
                 pinjamanTrx.getLastUpdate(),
-                pinjamanTrx.getLastUpdateBy() != null ? pinjamanTrx.getLastUpdateBy().getEmployeeId(): null
+                pinjamanTrx.getLastUpdateBy() != null ? pinjamanTrx.getLastUpdateBy().getEmployeeId(): null,
+                pinjamanTrx.getPinjaman() != null ? pinjamanTrx.getPinjaman().getJenisPinjaman() : null
 
         ));
 
+    }
+
+    @Override
+    public List<PinjamanTransactionServiceResponse.getPinjamanTransactionResponse>
+            findByCustomerId(Integer customerId, String status, String keyword) {
+        String statusParam = (status == null || status.isBlank()) ? null : status;
+        String keywordParam = (keyword == null || keyword.isBlank()) ? null : keyword;
+        List<PinjamanTransactionEntity> pinjamanTransList = pinjamanTransactionRepository.findByCustomer(customerId, statusParam, keywordParam);
+
+        return pinjamanTransList.stream().map(pinjamanTrx -> new PinjamanTransactionServiceResponse.getPinjamanTransactionResponse(
+                pinjamanTrx.getTransPinjamanId(),
+                pinjamanTrx.getKodeTransaksi(),
+                pinjamanTrx.getCustomer().getCustomerId(),
+                pinjamanTrx.getCustomer().getUserName(),
+                pinjamanTrx.getPinjaman() != null ? pinjamanTrx.getPinjaman().getPinjamanId() : null,
+                pinjamanTrx.getTanggalPengajuan(),
+                pinjamanTrx.getTanggalReview(),
+                pinjamanTrx.getTanggalApproval(),
+                pinjamanTrx.getNominalPinjaman(),
+                pinjamanTrx.getTenor(),
+                pinjamanTrx.getStatusPengajuan(),
+                pinjamanTrx.getNoteMarketing(),
+                pinjamanTrx.getNoteBm(),
+                pinjamanTrx.getNoteBackOffice(),
+                pinjamanTrx.getLastUpdate(),
+                pinjamanTrx.getLastUpdateBy() != null ? pinjamanTrx.getLastUpdateBy().getEmployeeId(): null,
+                pinjamanTrx.getPinjaman() != null ? pinjamanTrx.getPinjaman().getJenisPinjaman() : null
+
+        )).toList();
     }
 
     @Override
@@ -110,7 +140,8 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
                 trx.getNoteBm(),
                 trx.getNoteBackOffice(),
                 trx.getLastUpdate(),
-                trx.getLastUpdateBy() != null ? trx.getLastUpdateBy().getEmployeeId() : null
+                trx.getLastUpdateBy() != null ? trx.getLastUpdateBy().getEmployeeId() : null,
+                trx.getPinjaman() != null ? trx.getPinjaman().getJenisPinjaman() : null
         );
     }
 
@@ -119,21 +150,8 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
     public PinjamanTransactionServiceResponse.getPinjamanTransactionResponse addPinjamanTransaction(PinjamanTransactionServiceRequest.pinjamanTransactionAddRequest addRequest) {
         CustomerEntity customer = customerRepository.findById(addRequest.customerId)
                 .orElseThrow(() -> new EntityNotFoundException("Customer dengan id " + addRequest.customerId + " tidak ditemukan"));
-        
-        Optional<PlafondEntity> plafondOpt = plafondRepository.findByUser_CustomerId(addRequest.customerId);
 
-        if (plafondOpt.isPresent()) {
-            PlafondEntity plafond = plafondOpt.get();
-            long totalPlafond = plafond.getTotalPlafond() != null ? plafond.getTotalPlafond() : 0;
-            long totalPinjamanDisetujui = pinjamanTransactionRepository
-                    .sumNominalPinjamanDisetujuiByCustomer(addRequest.customerId);
-            long sisaPlafond = totalPlafond - totalPinjamanDisetujui;
-
-            if (addRequest.nominalPinjaman > sisaPlafond) {
-                throw new IllegalArgumentException(
-                        "Nominal pinjaman melebihi sisa plafond Anda (sisa plafond: " + sisaPlafond + ")");
-            }
-        }
+        validateSisaPlafond(addRequest.customerId, addRequest.nominalPinjaman);
 
         PinjamanTransactionEntity trx = new PinjamanTransactionEntity();
         trx.setCustomer(customer);
@@ -171,7 +189,8 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
                 saved.getNoteBm(),
                 saved.getNoteBackOffice(),
                 saved.getLastUpdate(),
-                saved.getLastUpdateBy() != null ? saved.getLastUpdateBy().getEmployeeId() : null
+                saved.getLastUpdateBy() != null ? saved.getLastUpdateBy().getEmployeeId() : null,
+                saved.getPinjaman() != null ? saved.getPinjaman().getJenisPinjaman() : null
         );
     }
 
@@ -200,6 +219,26 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
         }
     }
 
+    // cek sisa plafond customer pengajuan dan saat approve BM
+    private void validateSisaPlafond(Integer customerId, Integer nominalPinjaman) {
+        Optional<PlafondEntity> plafondOpt = plafondRepository.findByUser_CustomerId(customerId);
+
+        if (plafondOpt.isEmpty()) {
+            return;
+        }
+
+        PlafondEntity plafond = plafondOpt.get();
+        long totalPlafond = plafond.getTotalPlafond() != null ? plafond.getTotalPlafond() : 0;
+        long totalPinjamanDisetujui = pinjamanTransactionRepository
+                .sumNominalPinjamanDisetujuiByCustomer(customerId);
+        long sisaPlafond = totalPlafond - totalPinjamanDisetujui;
+
+        if (nominalPinjaman > sisaPlafond) {
+            throw new IllegalArgumentException(
+                    "Nominal pinjaman melebihi sisa plafond customer (sisa plafond: " + sisaPlafond + ")");
+        }
+    }
+
     @Override
     @Transactional
     public void updatePinjamanTransaction(Integer id, Integer customerId, Integer pinjamanId, Integer nominalPinjaman, Integer tenor,
@@ -213,6 +252,10 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
 
         if (trxOpt.isEmpty()) {
             throw new EntityNotFoundException("pinjaman transaction id tidak ditemukan");
+        }
+
+        if ("Disetujui".equals(statusPengajuan)) {
+            validateSisaPlafond(customerId, nominalPinjaman);
         }
 
         CustomerEntity customer = customerRepository.findById(customerId)
