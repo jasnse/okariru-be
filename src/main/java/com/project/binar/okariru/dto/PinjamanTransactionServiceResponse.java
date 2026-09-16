@@ -28,6 +28,7 @@ public class PinjamanTransactionServiceResponse {
         String noteBackOffice;
         LocalDate lastUpdate;
         Integer lastUpdateBy;
+        String jenisPinjaman;
     }
 
     @Setter

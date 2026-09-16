@@ -109,10 +109,14 @@ public class AngsuranServiceImpl implements AngsuranService {
         //hitung bunga dan pokok berdasarkan tenor dan rate bunga
         int tenor = generateRequest.tenor;
         long nominalPinjaman = transPinjaman.getNominalPinjaman();
+
         double bungaRate = transPinjaman.getPinjaman().getBunga() != null ? transPinjaman.getPinjaman().getBunga() : 0.0;
+        double bungaPerBulan = nominalPinjaman * (bungaRate / 100);
+
+        double biayaLainnya = transPinjaman.getPinjaman().getBiayaLainnya() != null ? transPinjaman.getPinjaman().getBiayaLainnya() : 0.0;
+        double biayaLainnyaPerBulan = biayaLainnya / tenor;
 
         long pokokPerBulan = nominalPinjaman / tenor;
-        double bungaPerBulan = (nominalPinjaman * bungaRate) / tenor;
 
         LocalDate tanggalMulai = transPinjaman.getTanggalApproval() != null ? transPinjaman.getTanggalApproval() : LocalDate.now();
 
@@ -123,7 +127,7 @@ public class AngsuranServiceImpl implements AngsuranService {
             angsuran.setTransPinjaman(transPinjaman);
             angsuran.setJumlahPokok(pokokPerBulan);
             angsuran.setJumlahBunga(bungaPerBulan);
-            int total = (int) Math.round(pokokPerBulan + bungaPerBulan);
+            int total = (int) Math.round(pokokPerBulan + bungaPerBulan + biayaLainnyaPerBulan);
             angsuran.setTotalAngsuran(total);
             angsuran.setTanggalJatuhTempo(tanggalMulai.plusMonths(i));
             angsuran.setStatusAngsuran("Belum Bayar");

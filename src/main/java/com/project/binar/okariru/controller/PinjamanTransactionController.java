@@ -33,6 +33,16 @@ public class PinjamanTransactionController {
         return ResponseEntity.ok(pinjamanTransactionService.findAll(status,keyword, page, size));
     }
 
+    //get pinjaman transaction list by customer
+    @GetMapping("/customer")
+    public ResponseEntity<List<PinjamanTransactionServiceResponse.getPinjamanTransactionResponse>> findByCustomerId(
+            @RequestParam Integer customerId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword
+    ){
+        return ResponseEntity.ok(pinjamanTransactionService.findByCustomerId(customerId, status, keyword));
+    }
+
     //get pinjaman transaction by Id
     @GetMapping(headers = "idPinjamanTransactionSearch")
     public ResponseEntity<PinjamanTransactionServiceResponse.getPinjamanTransactionResponse> getPinjamanTransactionById(

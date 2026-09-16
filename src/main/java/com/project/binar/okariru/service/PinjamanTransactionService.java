@@ -14,6 +14,8 @@ public interface PinjamanTransactionService {
 
     Page<PinjamanTransactionServiceResponse.getPinjamanTransactionResponse> findAll(String status, String keyword, int page, int size);
 
+    List<PinjamanTransactionServiceResponse.getPinjamanTransactionResponse> findByCustomerId(Integer customerId, String status, String keyword);
+
 
     PinjamanTransactionServiceResponse.getPinjamanTransactionResponse getPinjamanTransactionById(Integer id);
 
