@@ -12,6 +12,8 @@ public interface AngsuranService {
 
     AngsuranResponse.getAngsuranResponse getAngsuranById(Integer id);
 
+    List<AngsuranResponse.getAngsuranResponse> getAngsuranByTransPinjaman(Integer transPinjamanId);
+
     AngsuranResponse.getAngsuranResponse addAngsuran(AngsuranRequest.angsuranAddRequest addRequest);
 
     List<AngsuranResponse.getAngsuranResponse> generateAngsuran(AngsuranRequest.angsuranGenerateRequest generateRequest);

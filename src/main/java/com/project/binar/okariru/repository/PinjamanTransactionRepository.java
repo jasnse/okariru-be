@@ -22,7 +22,7 @@ public interface PinjamanTransactionRepository extends JpaRepository<PinjamanTra
 
    //untuk cek plafond
     @Query("SELECT COALESCE(SUM(pt.nominalPinjaman), 0) FROM PinjamanTransactionEntity pt WHERE " +
-            "pt.customer.customerId = :customerId AND pt.statusPengajuan IN ('Disetujui', 'Dicairkan')")
+            "pt.customer.customerId = :customerId AND pt.statusPengajuan IN ('Pengajuan','Disetujui', 'Dicairkan')")
     long sumNominalPinjamanDisetujuiByCustomer(@Param("customerId") Integer customerId);
 
 //    @Query("SELECT pt FROM PinjamanTransactionEntity pt WHERE " +

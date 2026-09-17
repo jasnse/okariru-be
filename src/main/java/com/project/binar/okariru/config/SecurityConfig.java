@@ -112,7 +112,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/customer/me").hasRole("CUSTOMER")
 
                         // ===== ANGSURAN  =====
-                        .requestMatchers(HttpMethod.GET, "/api/v1/angsuran")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/angsuran/**")
                             .hasAnyRole("CUSTOMER", "SUPERADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/angsuran/generate")
                             .hasAnyRole("BACKOFFICE", "SUPERADMIN")

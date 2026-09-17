@@ -59,6 +59,29 @@ public class AngsuranServiceImpl implements AngsuranService {
         );
     }
 
+    // ambil jadwal angsuran (semua tenor) milik satu pinjaman transaction, dipakai di halaman Rincian Angsuran
+    @Override
+    public List<AngsuranResponse.getAngsuranResponse> getAngsuranByTransPinjaman(Integer transPinjamanId) {
+
+        PinjamanTransactionEntity transPinjaman = pinjamanTransactionRepository.findById(transPinjamanId)
+                .orElseThrow(() -> new EntityNotFoundException("Pinjaman transaction dengan id " + transPinjamanId + " tidak ditemukan"));
+
+        return angsuranRepository.findByTransPinjamanOrderByTenorAsc(transPinjaman)
+                .stream()
+                .map(angsuran -> new AngsuranResponse.getAngsuranResponse(
+                        angsuran.getAngsuranId(),
+                        angsuran.getTransPinjaman().getTransPinjamanId(),
+                        angsuran.getJumlahPokok(),
+                        angsuran.getJumlahBunga(),
+                        angsuran.getTotalAngsuran(),
+                        angsuran.getTanggalJatuhTempo(),
+                        angsuran.getStatusAngsuran(),
+                        angsuran.getTenor(),
+                        angsuran.getSisaTagihan()
+                ))
+                .toList();
+    }
+
     @Override
     @Transactional
     public AngsuranResponse.getAngsuranResponse addAngsuran(AngsuranRequest.angsuranAddRequest addRequest) {
@@ -214,8 +237,7 @@ public class AngsuranServiceImpl implements AngsuranService {
             angsuranRepository.save(angsuran);
         }
 
-        // kalau semua angsuran udah lunas, pinjaman_transaction-nya ikut ditandai Lunas
-        // (otomatis bikin sisa plafond customer ini pulih, karena hitungSisaPlafond cuma ngitung yang statusnya "Disetujui")
+        // kalau semua angsuran udah lunas, status di pinjaman_transaction-nya ikut Lunas (Reset plafond)
         boolean semuaAngsuranLunas = angsuranList.stream().allMatch(a -> a.getSisaTagihan() <= 0);
         if (semuaAngsuranLunas) {
             transPinjaman.setStatusPengajuan("Lunas");
