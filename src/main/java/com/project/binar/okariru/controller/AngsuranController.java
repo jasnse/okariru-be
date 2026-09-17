@@ -29,6 +29,13 @@ public class AngsuranController {
         return ResponseEntity.ok(angsuranService.getAngsuranById(id));
     }
 
+    //get jadwal angsuran (semua tenor) milik satu pinjaman transaction
+    @GetMapping("/pinjaman/{transPinjamanId}")
+    public ResponseEntity<List<AngsuranResponse.getAngsuranResponse>> getAngsuranByTransPinjaman(
+            @PathVariable Integer transPinjamanId) {
+        return ResponseEntity.ok(angsuranService.getAngsuranByTransPinjaman(transPinjamanId));
+    }
+
     //add angsuran
     @PostMapping
     public ResponseEntity<AngsuranResponse.getAngsuranResponse> addAngsuran(
