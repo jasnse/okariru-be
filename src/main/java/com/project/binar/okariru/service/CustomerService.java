@@ -27,5 +27,8 @@ public interface CustomerService {
     void updateOwnProfile(Integer id, String sidName, String alamat, String pekerjaan, Integer pendapatan,
                            String maritalStatus, String noRekening, String tempatLahir, LocalDate tanggalLahir, String gender);
 
+    // dipakai mobile app buat sinkronisasi token FCM -- id datang dari JWT yang login
+    void updateFcmToken(Integer id, String fcmToken);
+
     String deleteCustomer(Integer id);
 }

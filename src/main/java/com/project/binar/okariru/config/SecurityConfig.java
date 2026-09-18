@@ -110,6 +110,8 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/api/v1/customer/**").hasAnyRole("MARKETING","BRANCH_MANAGER", "BACKOFFICE", "SUPERADMIN", "CUSTOMER")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/customer/me").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/customer/fcm-token").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/customer/fcm-token").hasRole("CUSTOMER")
 
                         // ===== ANGSURAN  =====
                         .requestMatchers(HttpMethod.GET, "/api/v1/angsuran/**")
