@@ -65,4 +65,7 @@ public class CustomerEntity {
 
     @Column(name = "role_customer")
     private String roleCustomer;
+
+    @Column(name = "fcm_token")
+    private String fcmToken;
 }

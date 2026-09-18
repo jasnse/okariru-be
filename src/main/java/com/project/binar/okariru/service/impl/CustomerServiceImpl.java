@@ -248,6 +248,18 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
+    public void updateFcmToken(Integer id, String fcmToken) {
+        CustomerEntity customer = customerRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("customer id tidak ditemukan"));
+
+        customer.setFcmToken(fcmToken);
+        customer.setUpdatedAt(LocalDate.now());
+
+        customerRepository.save(customer);
+    }
+
+    @Override
     public String deleteCustomer(Integer id) {
         CustomerEntity customerDelete = customerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("customer id: " + id + " tidak ditemukan"));

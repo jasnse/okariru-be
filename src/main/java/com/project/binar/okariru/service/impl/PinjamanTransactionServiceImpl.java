@@ -15,6 +15,7 @@ import com.project.binar.okariru.repository.PinjamanRepository;
 import com.project.binar.okariru.repository.PinjamanTransactionRepository;
 import com.project.binar.okariru.repository.PlafondRepository;
 import com.project.binar.okariru.service.PinjamanTransactionService;
+import com.project.binar.okariru.service.PushNotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +27,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -39,6 +42,7 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
     private final PinjamanRepository pinjamanRepository;
     private final EmployeRepository employeRepository;
     private final PlafondRepository plafondRepository;
+    private final PushNotificationService pushNotificationService;
 
 //    @Override
 //    public List<PinjamanTransactionServiceResponse.getPinjamanTransactionResponse> getAllPinjamanTransaction() {
@@ -262,6 +266,8 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
                 .orElseThrow(() -> new EntityNotFoundException("Customer dengan id " + customerId + " tidak ditemukan"));
 
         PinjamanTransactionEntity trxUpdate = trxOpt.get();
+        // simpan status sebelum di-overwrite, buat cek transisi ke "Dicairkan" di bawah
+        String statusSebelumnya = trxUpdate.getStatusPengajuan();
         trxUpdate.setCustomer(customer);
         trxUpdate.setNominalPinjaman(nominalPinjaman);
         trxUpdate.setTenor(tenor);
@@ -286,6 +292,18 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
         }
 
         pinjamanTransactionRepository.save(trxUpdate);
+
+        // kirim notifikasi kalau status berubah jadi Dicairkan
+        if ("Dicairkan".equals(statusPengajuan) && !"Dicairkan".equals(statusSebelumnya)) {
+            String nominalFormatted = NumberFormat.getNumberInstance(new Locale("in", "ID")).format(nominalPinjaman);
+            pushNotificationService.sendToCustomer(
+                    customerId,
+                    "Pinjaman Berhasil Dicairkan",
+                    "Pengajuan pinjaman " + trxUpdate.getKodeTransaksi() + " sebesar Rp " + nominalFormatted + " telah berhasil dicairkan.",
+                    "transaction",
+                    "okariru://status-pinjaman/" + trxUpdate.getTransPinjamanId()
+            );
+        }
     }
 
     @Override

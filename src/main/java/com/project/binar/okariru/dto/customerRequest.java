@@ -58,4 +58,10 @@ public class CustomerRequest {
         public LocalDate tanggalLahir;
         public String gender;
     }
+
+    // dikirim mobile app tiap dapat token FCM baru (PUT /api/v1/customer/fcm-token)
+    public static class customerFcmTokenRequest {
+        @NotBlank(message = "fcmToken harus diisi")
+        public String fcmToken;
+    }
 }

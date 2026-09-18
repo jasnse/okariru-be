@@ -77,6 +77,37 @@ public class CustomerController {
         return ResponseEntity.ok(respUpdate);
     }
 
+    // fcm-token sebagai kunci untuk ngirim notifikasi
+    @PutMapping("/fcm-token")
+    public ResponseEntity<CustomerResponse.customerUpdateResponse> updateFcmToken(
+            @Valid @RequestBody CustomerRequest.customerFcmTokenRequest request) {
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!(principal instanceof AppUser appUser) || appUser.getUserId() == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        customerService.updateFcmToken(appUser.getUserId(), request.fcmToken);
+
+        CustomerResponse.customerUpdateResponse respUpdate = new CustomerResponse.customerUpdateResponse();
+        respUpdate.setMessage("Token FCM berhasil diperbarui");
+        return ResponseEntity.ok(respUpdate);
+    }
+
+    @DeleteMapping("/fcm-token")
+    public ResponseEntity<CustomerResponse.customerUpdateResponse> clearFcmToken() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!(principal instanceof AppUser appUser) || appUser.getUserId() == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        customerService.updateFcmToken(appUser.getUserId(), null);
+
+        CustomerResponse.customerUpdateResponse respUpdate = new CustomerResponse.customerUpdateResponse();
+        respUpdate.setMessage("Token FCM berhasil dihapus");
+        return ResponseEntity.ok(respUpdate);
+    }
+
     //delete customer
     @DeleteMapping
     public ResponseEntity<CustomerResponse.customerDeleteResponse> deleteCustomer(@RequestParam Integer Id) {
