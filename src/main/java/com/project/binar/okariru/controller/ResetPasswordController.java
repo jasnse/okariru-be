@@ -22,7 +22,7 @@ public class ResetPasswordController {
     @PostMapping("/forgot-password")
     public ResponseEntity<String> requestOtp(@RequestParam String email) {
         String otp = otpService.generateOtp(email);
-        return ResponseEntity.ok("Kode OTP: " + otp + "telah dikirimkan ke email " + email);
+        return ResponseEntity.ok("Kode OTP telah dikirimkan ke email: " + email);
     }
 
     @PostMapping("/validate-otp")

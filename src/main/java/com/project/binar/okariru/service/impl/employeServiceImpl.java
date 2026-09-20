@@ -28,7 +28,7 @@ public class EmployeServiceImpl implements EmployeService {
 
     @Override
     public Page<EmployeResponse.employeGetResponse> findAll(String keyword, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("employeeId").ascending());
 
         Page<EmployeEntity> employeePage = employeRepository.searchEmployees(keyword, pageable);
 
