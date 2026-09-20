@@ -82,7 +82,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/customer/**").permitAll() //register
                         .requestMatchers(HttpMethod.POST, "/api/v1/reset/**").permitAll() //forgot password
 
-
+                                .requestMatchers(
+                                        "/v3/api-docs/**",
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html"
+                                ).permitAll()
 //                        .requestMatchers("/api/v1/reset/**").hasRole("CUSTOMER")
 
 

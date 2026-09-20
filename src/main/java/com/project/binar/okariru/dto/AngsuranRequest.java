@@ -1,5 +1,6 @@
 package com.project.binar.okariru.dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
@@ -41,7 +42,7 @@ public class AngsuranRequest {
     public static class angsuranGenerateRequest {
         @NotNull(message = "trans pinjaman id harus di pilih")
         public Integer transPinjamanId;
-        @NotNull(message = "tenor harus diisi")
+        @Min(value = 1, message = "tenor harus diisi")
         public Integer tenor;
     }
 
