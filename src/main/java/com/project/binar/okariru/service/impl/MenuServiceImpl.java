@@ -12,6 +12,8 @@ import com.project.binar.okariru.service.MenuService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,8 +21,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -52,12 +56,13 @@ public class MenuServiceImpl implements MenuService {
     //get menu berdasarkan role group (yang di assign)
 
     @Override
+    @Cacheable(cacheNames = "menu:my", key = "#username")
     public List<MenuResponse.myMenuResponse> getMyMenu(String username) {
         EmployeEntity employee = employeRepository.findByUsernameWithRoles(username)
                 .orElseThrow(() -> new EntityNotFoundException("Employee tidak ditemukan"));
 
         if (employee.getRoleGroup() == null) {
-            return List.of();
+            return new ArrayList<>();
         }
 
         List<MenugroupEntity> menuGroups = menugroupRepository.findByRole_RoleGroupId(employee.getRoleGroup().getRoleGroupId());
@@ -70,7 +75,7 @@ public class MenuServiceImpl implements MenuService {
                         menu.getPath(),
                         menu.getIcon()
                 ))
-                .toList();
+                .collect(Collectors.toList());
     }
 
 //    @Override
@@ -115,6 +120,7 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "menu:my", allEntries = true)
     public void updatemenu(Integer id, String namamenu, String deskripsimenu, String path, String icon){
         Optional<MenuEntity> menuOpt = menuRepository.findById(id);
 
@@ -138,6 +144,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "menu:my", allEntries = true)
     public String deleteMenu(Integer id) {
         MenuEntity menuDelete = menuRepository.findById(id)
                 .orElseThrow(()-> new EntityNotFoundException("menu id: " + id + " " + "tidak ditemukan" ));

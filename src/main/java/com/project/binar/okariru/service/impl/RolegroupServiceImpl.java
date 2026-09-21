@@ -13,6 +13,7 @@ import com.project.binar.okariru.service.RolegroupService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -146,6 +147,7 @@ public class RolegroupServiceImpl implements RolegroupService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "menu:my", allEntries = true)
     public void assignEmployee(Integer roleGroupId, Integer employeeId) {
         RolegroupEntity roleGroup = rolegroupRepository.findById(roleGroupId)
                 .orElseThrow(() -> new EntityNotFoundException("role group id " + roleGroupId + " tidak ditemukan"));
@@ -165,6 +167,7 @@ public class RolegroupServiceImpl implements RolegroupService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "menu:my", allEntries = true)
     public void removeEmployee(Integer roleGroupId, Integer employeeId) {
         EmployeEntity employee = employeRepository.findById(employeeId)
                 .orElseThrow(() -> new EntityNotFoundException("Employee " + employeeId + " tidak ditemukan"));
