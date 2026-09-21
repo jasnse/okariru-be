@@ -1,6 +1,8 @@
 package com.project.binar.okariru.exception;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -13,7 +15,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.sql.SQLException;
+
 //@ControllerAdvice
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -73,6 +78,23 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<String> handleBadCredentials(BadCredentialsException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+    }
+
+    //constraint database dilanggar (data terlalu panjang, duplikat, kolom required kosong, dll)
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<String> handleDataIntegrity(DataIntegrityViolationException e) {
+        Throwable root = e.getMostSpecificCause();
+        log.error("Data integrity violation: {}", root.getMessage(), e);
+
+        String sqlState = root instanceof SQLException sql && sql.getSQLState() != null ? sql.getSQLState() : "";
+        String pesan = switch (sqlState) {
+            case "22001" -> "Ada isian yang melebihi batas panjang, periksa kembali data Anda";
+            case "23505" -> "Data sudah terdaftar (duplikat)";
+            case "23502" -> "Ada data wajib yang belum diisi";
+            default -> "Data tidak valid, periksa kembali isian Anda";
+        };
+        HttpStatus status = "23505".equals(sqlState) ? HttpStatus.CONFLICT : HttpStatus.BAD_REQUEST;
+        return ResponseEntity.status(status).body(pesan);
     }
 
     //fallback Error
