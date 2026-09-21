@@ -25,7 +25,10 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: maven
-      - run: ./mvnw -B verify
+      - name: mvn verify
+        run: |
+          chmod +x mvnw
+          ./mvnw -B verify
 
   build:
     name: Build & push image (GHCR)
