@@ -32,10 +32,12 @@ public class CustomerRequest {
 
         @Size(max = 50, message = "Tempat lahir maksimal 50 karakter")
         public String tempatLahir;
+        public LocalDate tanggalLahir;
         @Size(max = 50, message = "Alamat maksimal 50 karakter")
         public String alamat;
         @Size(max = 50, message = "Pekerjaan maksimal 50 karakter")
         public String pekerjaan;
+        public Integer pendapatan;
         @Size(max = 20, message = "Status pernikahan maksimal 20 karakter")
         public String maritalStatus;
         @Size(max = 20, message = "Gender maksimal 20 karakter")

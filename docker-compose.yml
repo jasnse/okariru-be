@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: okariru-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:?DB_NAME belum diisi di .env}
+      POSTGRES_USER: ${DB_USERNAME:?DB_USERNAME belum diisi di .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD belum diisi di .env}
+    volumes:
+      # Data PostgreSQL disimpan di mesin host (bind mount), bukan volAume internal Docker.
+      # Lokasi diatur lewat POSTGRES_DATA_DIR di .env.
+      - ${POSTGRES_DATA_DIR:-./data/postgres}:/var/lib/postgresql/data
+      # Opsional: file .sql di sini dijalankan otomatis SEKALI saat database pertama kali dibuat
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${DB_USERNAME} -d $${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # Tidak dibuka ke luar. Hanya bisa diakses service lain lewat network compose.
+    # Kalau perlu akses dari host, aktifkan (dan pastikan hanya ke localhost):
+    # ports:
+    #   - "127.0.0.1:5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: okariru-redis-prod
+    restart: unless-stopped
+    volumes:
+      - ${REDIS_DATA_DIR:-./data/redis}:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Lokal: build dari Dockerfile. Server (CI/CD): APP_IMAGE = image dari GHCR, hanya di-pull.
+    image: ${APP_IMAGE:-okariru-be:latest}
+    container_name: okariru-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # Semua variabel di .env diteruskan ke container
+    env_file:
+      - .env
+    environment:
+      # Alamat DB & Redis di dalam network compose = nama service, dirakit dari nilai di .env.
+      # Ini menimpa DB_URL / REDIS_HOST dari .env (yang biasanya localhost untuk jalan di IDE).
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME}?currentSchema=${DB_SCHEMA:-public}
+      REDIS_HOST: redis
+      JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75}
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    volumes:
+      # Gambar upload disimpan di host supaya tidak hilang saat container dibuat ulang
+      - ${UPLOADS_DIR:-./uploads}:/app/uploads
+      # Kredensial Firebase (read-only). Kalau file tidak ada, push notification dinonaktifkan oleh aplikasi.
+      - ${FIREBASE_CREDENTIALS_FILE:-./firebase-service-account.json}:/app/firebase-service-account.json:ro

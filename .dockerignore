@@ -1,0 +1,16 @@
+# Rahasia: jangan pernah masuk ke image
+.env
+.env.*
+firebase-service-account.json
+
+# Hasil build & file IDE/git
+target/
+.git
+.gitignore
+.idea
+.vscode
+HELP.md
+
+# Data runtime (di-mount lewat volume, bukan di-bake ke image)
+uploads/
+data/
