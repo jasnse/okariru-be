@@ -57,12 +57,13 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME}?currentSchema=${DB_SCHEMA:-public}
       REDIS_HOST: redis
       JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75}
+      # UPLOADS_DIR di .env = folder di HOST (untuk bind mount). Di dalam container path-nya tetap.
+      UPLOADS_DIR: /app/uploads/images
     user: "${APP_UID:-1000}:${APP_GID:-1000}"
     ports:
       - "${APP_PORT:-8080}:8080"
     volumes:
       # Gambar upload disimpan di host supaya tidak hilang saat container dibuat ulang
-#      - ${UPLOADS_DIR:-./uploads}:/app/uploads
       - ${UPLOADS_DIR:-./uploads/images}:/app/uploads/images
       # Kredensial Firebase (read-only). Kalau file tidak ada, push notification dinonaktifkan oleh aplikasi.
       - ${FIREBASE_CREDENTIALS_FILE:-./firebase-service-account.json}:/app/firebase-service-account.json:ro

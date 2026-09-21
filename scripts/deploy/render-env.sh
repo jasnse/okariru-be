@@ -33,8 +33,18 @@ for k in "${REQUIRED[@]}"; do
   emit "$k" "${!k}"
 done
 
+# Path host relatif (mis. "uploads/images") dianggap NAMED VOLUME oleh docker compose.
+# Awali dengan "./" supaya menjadi bind mount.
+HOST_PATHS=(POSTGRES_DATA_DIR UPLOADS_DIR REDIS_DATA_DIR)
+is_host_path() { local p; for p in "${HOST_PATHS[@]}"; do [ "$p" = "$1" ] && return 0; done; return 1; }
+
 for k in "${OPTIONAL[@]}"; do
-  [ -n "${!k-}" ] && emit "$k" "${!k}"
+  [ -n "${!k-}" ] || continue
+  v="${!k}"
+  if is_host_path "$k"; then
+    case "$v" in /*|./*|../*|"~"*) ;; *) v="./$v" ;; esac
+  fi
+  emit "$k" "$v"
 done
 
 [ -n "${FIREBASE_CREDENTIALS_B64-}" ] || die "FIREBASE_CREDENTIALS_B64 kosong"
