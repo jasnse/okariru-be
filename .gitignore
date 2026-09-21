@@ -35,3 +35,12 @@ build/
 
 ### Firebase ###
 firebase-service-account.json
+
+### CI/CD (rahasia & artefak sementara) ###
+.env.github
+.deploy/
+
+### Docker runtime data ###
+data/
+backups/
+db/
