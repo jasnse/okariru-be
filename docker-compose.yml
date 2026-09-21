@@ -62,6 +62,7 @@ services:
       - "${APP_PORT:-8080}:8080"
     volumes:
       # Gambar upload disimpan di host supaya tidak hilang saat container dibuat ulang
-      - ${UPLOADS_DIR:-./uploads}:/app/uploads
+#      - ${UPLOADS_DIR:-./uploads}:/app/uploads
+      - ${UPLOADS_DIR:-./uploads/images}:/app/uploads/images
       # Kredensial Firebase (read-only). Kalau file tidak ada, push notification dinonaktifkan oleh aplikasi.
       - ${FIREBASE_CREDENTIALS_FILE:-./firebase-service-account.json}:/app/firebase-service-account.json:ro
