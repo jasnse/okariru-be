@@ -2,6 +2,9 @@ package com.project.binar.okariru.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +16,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -130,5 +135,41 @@ class GlobalExceptionHandlerTest {
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
         assertEquals("Terjadi kesalahan pada server", result.getBody());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "22001, BAD_REQUEST, 'Ada isian yang melebihi batas panjang, periksa kembali data Anda'",
+            "23505, CONFLICT, Data sudah terdaftar (duplikat)",
+            "23502, BAD_REQUEST, Ada data wajib yang belum diisi",
+            "99999, BAD_REQUEST, 'Data tidak valid, periksa kembali isian Anda'"
+    })
+    void handleDataIntegrity_memetakanSqlState(String sqlState, HttpStatus status, String pesan) {
+        DataIntegrityViolationException ex =
+                new DataIntegrityViolationException("gagal", new SQLException("root", sqlState));
+
+        ResponseEntity<String> result = handler.handleDataIntegrity(ex);
+
+        assertEquals(status, result.getStatusCode());
+        assertEquals(pesan, result.getBody());
+    }
+
+    @Test
+    void handleDataIntegrity_sqlStateNull_pesanDefault() {
+        DataIntegrityViolationException ex =
+                new DataIntegrityViolationException("gagal", new SQLException("root"));
+
+        ResponseEntity<String> result = handler.handleDataIntegrity(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        assertEquals("Data tidak valid, periksa kembali isian Anda", result.getBody());
+    }
+
+    @Test
+    void handleDataIntegrity_bukanSqlException_pesanDefault() {
+        ResponseEntity<String> result = handler.handleDataIntegrity(new DataIntegrityViolationException("gagal"));
+
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        assertEquals("Data tidak valid, periksa kembali isian Anda", result.getBody());
     }
 }
