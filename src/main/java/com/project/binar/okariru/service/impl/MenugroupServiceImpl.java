@@ -13,6 +13,7 @@ import com.project.binar.okariru.service.MenugroupService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -91,6 +92,7 @@ public class MenugroupServiceImpl implements MenugroupService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "menu:my", allEntries = true)
     public MenugroupResponse.getMenuGroupResponse addMenuGroup(MenugroupRequest.menuGroupAddRequest addRequest) {
         MenuEntity menu = menuRepository.findById(addRequest.menuId)
                 .orElseThrow(() -> new EntityNotFoundException("Menu dengan id " + addRequest.menuId + " tidak ditemukan"));
@@ -114,6 +116,7 @@ public class MenugroupServiceImpl implements MenugroupService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "menu:my", allEntries = true)
     public void updateMenuGroup(Integer id, Integer menuId, Integer roleGroupId) {
         Optional<MenugroupEntity> mgOpt = menugroupRepository.findById(id);
 
@@ -139,6 +142,7 @@ public class MenugroupServiceImpl implements MenugroupService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "menu:my", allEntries = true)
     public String deleteMenuGroup(Integer id) {
         MenugroupEntity mgDelete = menugroupRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("menu group id: " + id + " tidak ditemukan"));

@@ -10,6 +10,8 @@ import com.project.binar.okariru.service.PinjamanService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class PinjamanServiceImpl implements PinjamanService {
     private final PinjamanRepository pinjamanRepository;
 
     @Override
+    @Cacheable(cacheNames = "pinjaman", key = "'all'")
     public List<PinjamanResponse.getPinjamanResponse> getAllPinjaman() {
         return pinjamanRepository.findAll()
                 .stream()
@@ -39,7 +43,7 @@ public class PinjamanServiceImpl implements PinjamanService {
                         pinjaman.getCreatedAt(),
                         pinjaman.getUpdatedAt()
                 ))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -61,6 +65,7 @@ public class PinjamanServiceImpl implements PinjamanService {
     }
 
     @Override
+    @Cacheable(cacheNames = "pinjaman", key = "#id")
     public PinjamanResponse.getPinjamanResponse getPinjamanById(Integer id) {
         PinjamanEntity pinjaman = pinjamanRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("pinjaman dengan Id " + id + " tidak ditemukan"));
@@ -76,6 +81,7 @@ public class PinjamanServiceImpl implements PinjamanService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "pinjaman", allEntries = true)
     public PinjamanResponse.getPinjamanResponse addPinjaman(PinjamanRequest.pinjamanAddRequest addRequest) {
         if (pinjamanRepository.existsByJenisPinjaman(addRequest.jenisPinjaman)) {
             throw new IllegalArgumentException("Jenis pinjaman " + addRequest.jenisPinjaman + " sudah ada");
@@ -102,6 +108,7 @@ public class PinjamanServiceImpl implements PinjamanService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "pinjaman", allEntries = true)
     public void updatePinjaman(Integer id, String jenisPinjaman, String deskripsiPinjaman, Double bunga, Double biayaLainnya) {
         Optional<PinjamanEntity> pinjamanOpt = pinjamanRepository.findById(id);
 
@@ -123,6 +130,7 @@ public class PinjamanServiceImpl implements PinjamanService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "pinjaman", allEntries = true)
     public String deletePinjaman(Integer id) {
         PinjamanEntity pinjamanDelete = pinjamanRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("pinjaman id: " + id + " tidak ditemukan"));

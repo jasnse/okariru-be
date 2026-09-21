@@ -5,6 +5,7 @@ import io.lettuce.core.resource.DefaultClientResources;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.CacheKeyPrefix;
@@ -25,8 +26,10 @@ import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import tools.jackson.databind.jsontype.PolymorphicTypeValidator;
 
 import java.time.Duration;
+import java.util.Map;
 
 @Configuration
+@EnableCaching
 @RequiredArgsConstructor
 public class RedisConfig {
 
@@ -105,9 +108,13 @@ public class RedisConfig {
                                         valueSerializer
                                 )
                         );
-
+        Map<String, RedisCacheConfiguration> perCache = Map.of(
+                "menu:my",  configuration.entryTtl(Duration.ofMinutes(30)),
+                "pinjaman", configuration.entryTtl(Duration.ofHours(1))
+        );
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(configuration)
+                .withInitialCacheConfigurations(perCache)
                 .build();
     }
 
