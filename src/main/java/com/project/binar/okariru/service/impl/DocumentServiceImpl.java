@@ -75,9 +75,6 @@ public class DocumentServiceImpl implements DocumentService {
 
         return documentList.stream()
                 .map(doc -> {
-                    // path RELATIF (bukan absolute URL dgn host/scheme) supaya FE selalu akses
-                    // lewat origin-nya sendiri (proxy/rewrite Vercel) dan gak kena mixed-content
-                    // waktu FE di-hosting HTTPS tapi backend masih HTTP di IP polos
                     String fileUrl = UriComponentsBuilder
                             .fromPath("/api/v1/document/download")
                             .queryParam("pathfile", doc.getPathfile())
