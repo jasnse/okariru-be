@@ -94,6 +94,60 @@ class PinjamanTransactionControllerTest {
     }
 
     @Test
+    void reviewPinjamanTransaction_meneruskanNoteDanMengembalikanPesan() {
+        PinjamanTransactionServiceRequest.pinjamanTransactionReviewRequest req =
+                new PinjamanTransactionServiceRequest.pinjamanTransactionReviewRequest();
+        req.note = "catatan review";
+
+        ResponseEntity<PinjamanTransactionServiceResponse.pinjamanTransactionUpdateResponse> result =
+                controller.reviewPinjamanTransaction(3, req);
+
+        verify(pinjamanTransactionService).reviewPinjamanTransaction(3, "catatan review");
+        assertEquals("Pengajuan berhasil direview", result.getBody().getMessage());
+    }
+
+    @Test
+    void approvalPinjamanTransaction_disetujui_meneruskanApprovedTrue() {
+        PinjamanTransactionServiceRequest.pinjamanTransactionApprovalRequest req =
+                new PinjamanTransactionServiceRequest.pinjamanTransactionApprovalRequest();
+        req.approved = true;
+        req.note = "oke";
+
+        ResponseEntity<PinjamanTransactionServiceResponse.pinjamanTransactionUpdateResponse> result =
+                controller.approvalPinjamanTransaction(3, req);
+
+        verify(pinjamanTransactionService).approvalPinjamanTransaction(3, true, "oke");
+        assertEquals("Pengajuan berhasil disetujui", result.getBody().getMessage());
+    }
+
+    @Test
+    void approvalPinjamanTransaction_ditolak_meneruskanApprovedFalse() {
+        PinjamanTransactionServiceRequest.pinjamanTransactionApprovalRequest req =
+                new PinjamanTransactionServiceRequest.pinjamanTransactionApprovalRequest();
+        req.approved = false;
+        req.note = "gagal syarat";
+
+        ResponseEntity<PinjamanTransactionServiceResponse.pinjamanTransactionUpdateResponse> result =
+                controller.approvalPinjamanTransaction(3, req);
+
+        verify(pinjamanTransactionService).approvalPinjamanTransaction(3, false, "gagal syarat");
+        assertEquals("Pengajuan berhasil ditolak", result.getBody().getMessage());
+    }
+
+    @Test
+    void disbursePinjamanTransaction_meneruskanNoteDanMengembalikanPesan() {
+        PinjamanTransactionServiceRequest.pinjamanTransactionDisburseRequest req =
+                new PinjamanTransactionServiceRequest.pinjamanTransactionDisburseRequest();
+        req.note = "cair";
+
+        ResponseEntity<PinjamanTransactionServiceResponse.pinjamanTransactionUpdateResponse> result =
+                controller.disbursePinjamanTransaction(3, req);
+
+        verify(pinjamanTransactionService).disbursePinjamanTransaction(3, "cair");
+        assertEquals("Pinjaman berhasil dicairkan", result.getBody().getMessage());
+    }
+
+    @Test
     void deletePinjamanTransaction() {
         ResponseEntity<PinjamanTransactionServiceResponse.pinjamanTransactionDeleteResponse> result =
                 controller.deletePinjamanTransaction(3);
