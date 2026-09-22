@@ -31,7 +31,7 @@ import java.util.Map;
 public class SecurityConfig {
 
 
-
+//1
 
     @Value("${app.security.cors-allowed-origin}")
     private List<String> AllowedOrigins;
