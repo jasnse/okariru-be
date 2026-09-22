@@ -595,6 +595,34 @@ class PinjamanTransactionServiceImplTest {
     }
 
     @Test
+    void approval_ditolak_mengirimNotifikasiDenganAlasan() {
+        loginWithRole("BRANCH_MANAGER");
+        trx.setStatusPengajuan("Direview");
+        when(pinjamanTransactionRepository.findById(3)).thenReturn(Optional.of(trx));
+
+        service.approvalPinjamanTransaction(3, false, "gagal syarat");
+
+        ArgumentCaptor<String> body = ArgumentCaptor.forClass(String.class);
+        verify(pushNotificationService).sendToCustomer(eq(7), eq("Pengajuan Pinjaman Ditolak"), body.capture(),
+                eq("transaction"), eq("okariru://status-pinjaman/3"));
+        assertTrue(body.getValue().contains("TRX-2026-00003"));
+        assertTrue(body.getValue().contains("gagal syarat"));
+    }
+
+    @Test
+    void approval_disetujui_tidakMengirimNotifikasi() {
+        loginWithRole("BRANCH_MANAGER");
+        trx.setStatusPengajuan("Direview");
+        when(pinjamanTransactionRepository.findById(3)).thenReturn(Optional.of(trx));
+        when(plafondRepository.findByUser_CustomerId(7)).thenReturn(Optional.of(plafond(10_000_000)));
+        when(pinjamanTransactionRepository.sumNominalPinjamanDisetujuiByCustomer(7)).thenReturn(1_000_000L);
+
+        service.approvalPinjamanTransaction(3, true, "oke");
+
+        verifyNoInteractions(pushNotificationService);
+    }
+
+    @Test
     void approval_roleSelainBranchManager_ditolak() {
         loginWithRole("MARKETING");
 
