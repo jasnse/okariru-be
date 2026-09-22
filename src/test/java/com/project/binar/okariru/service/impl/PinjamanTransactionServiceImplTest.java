@@ -520,6 +520,154 @@ class PinjamanTransactionServiceImplTest {
         verify(pushNotificationService, never()).sendToCustomer(anyInt(), anyString(), anyString(), anyString(), any());
     }
 
+    // ---------- reviewPinjamanTransaction ----------
+
+    @Test
+    void review_marketingDiizinkan_statusPengajuan() {
+        loginWithRole("MARKETING");
+        when(pinjamanTransactionRepository.findById(3)).thenReturn(Optional.of(trx));
+
+        service.reviewPinjamanTransaction(3, "catatan review");
+
+        assertEquals("Direview", trx.getStatusPengajuan());
+        assertEquals("catatan review", trx.getNoteMarketing());
+        assertEquals(LocalDate.now(), trx.getTanggalReview());
+        verify(pinjamanTransactionRepository).save(trx);
+    }
+
+    @Test
+    void review_roleSelainMarketing_ditolak() {
+        loginWithRole("BACKOFFICE");
+
+        assertThrows(AccessDeniedException.class, () -> service.reviewPinjamanTransaction(3, "x"));
+        verifyNoInteractions(pinjamanTransactionRepository);
+    }
+
+    @Test
+    void review_statusBukanPengajuan_ditolak() {
+        loginWithRole("MARKETING");
+        trx.setStatusPengajuan("Direview");
+        when(pinjamanTransactionRepository.findById(3)).thenReturn(Optional.of(trx));
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> service.reviewPinjamanTransaction(3, "x"));
+        assertTrue(ex.getMessage().contains("Pengajuan"));
+        verify(pinjamanTransactionRepository, never()).save(any());
+    }
+
+    @Test
+    void review_superAdmin_bypassStatusCheck() {
+        loginWithRole("SUPERADMIN");
+        trx.setStatusPengajuan("Disetujui");
+        when(pinjamanTransactionRepository.findById(3)).thenReturn(Optional.of(trx));
+
+        assertDoesNotThrow(() -> service.reviewPinjamanTransaction(3, "x"));
+        assertEquals("Direview", trx.getStatusPengajuan());
+    }
+
+    // ---------- approvalPinjamanTransaction ----------
+
+    @Test
+    void approval_branchManagerDiizinkan_disetujui() {
+        loginWithRole("BRANCH_MANAGER");
+        trx.setStatusPengajuan("Direview");
+        when(pinjamanTransactionRepository.findById(3)).thenReturn(Optional.of(trx));
+        when(plafondRepository.findByUser_CustomerId(7)).thenReturn(Optional.of(plafond(10_000_000)));
+        when(pinjamanTransactionRepository.sumNominalPinjamanDisetujuiByCustomer(7)).thenReturn(1_000_000L);
+
+        service.approvalPinjamanTransaction(3, true, "oke");
+
+        assertEquals("Disetujui", trx.getStatusPengajuan());
+        assertEquals("oke", trx.getNoteBm());
+        verify(pinjamanTransactionRepository).save(trx);
+    }
+
+    @Test
+    void approval_branchManagerDiizinkan_ditolak_tanpaCekPlafond() {
+        loginWithRole("BRANCH_MANAGER");
+        trx.setStatusPengajuan("Direview");
+        when(pinjamanTransactionRepository.findById(3)).thenReturn(Optional.of(trx));
+
+        service.approvalPinjamanTransaction(3, false, "gagal syarat");
+
+        assertEquals("Ditolak", trx.getStatusPengajuan());
+        verifyNoInteractions(plafondRepository);
+    }
+
+    @Test
+    void approval_roleSelainBranchManager_ditolak() {
+        loginWithRole("MARKETING");
+
+        assertThrows(AccessDeniedException.class, () -> service.approvalPinjamanTransaction(3, true, "x"));
+        verifyNoInteractions(pinjamanTransactionRepository);
+    }
+
+    @Test
+    void approval_statusBukanDireview_ditolak() {
+        loginWithRole("BRANCH_MANAGER");
+        trx.setStatusPengajuan("Pengajuan");
+        when(pinjamanTransactionRepository.findById(3)).thenReturn(Optional.of(trx));
+
+        assertThrows(IllegalArgumentException.class, () -> service.approvalPinjamanTransaction(3, true, "x"));
+        verify(pinjamanTransactionRepository, never()).save(any());
+    }
+
+    @Test
+    void approval_nominalMelebihiSisaPlafond_ditolak() {
+        loginWithRole("BRANCH_MANAGER");
+        trx.setStatusPengajuan("Direview");
+        when(pinjamanTransactionRepository.findById(3)).thenReturn(Optional.of(trx));
+        when(plafondRepository.findByUser_CustomerId(7)).thenReturn(Optional.of(plafond(1_000_000)));
+        when(pinjamanTransactionRepository.sumNominalPinjamanDisetujuiByCustomer(7)).thenReturn(0L);
+
+        assertThrows(IllegalArgumentException.class, () -> service.approvalPinjamanTransaction(3, true, "x"));
+        verify(pinjamanTransactionRepository, never()).save(any());
+    }
+
+    // ---------- disbursePinjamanTransaction ----------
+
+    @Test
+    void disburse_backofficeDiizinkan_mengirimNotifikasi() {
+        loginWithRole("BACKOFFICE");
+        trx.setStatusPengajuan("Disetujui");
+        when(pinjamanTransactionRepository.findById(3)).thenReturn(Optional.of(trx));
+
+        service.disbursePinjamanTransaction(3, "cair");
+
+        assertEquals("Dicairkan", trx.getStatusPengajuan());
+        assertEquals("cair", trx.getNoteBackOffice());
+        verify(pinjamanTransactionRepository).save(trx);
+        verify(pushNotificationService).sendToCustomer(eq(7), eq("Pinjaman Berhasil Dicairkan"), anyString(), eq("transaction"), anyString());
+    }
+
+    @Test
+    void disburse_roleSelainBackoffice_ditolak() {
+        loginWithRole("BRANCH_MANAGER");
+
+        assertThrows(AccessDeniedException.class, () -> service.disbursePinjamanTransaction(3, "x"));
+        verifyNoInteractions(pinjamanTransactionRepository);
+        verifyNoInteractions(pushNotificationService);
+    }
+
+    @Test
+    void disburse_statusBukanDisetujui_ditolak() {
+        loginWithRole("BACKOFFICE");
+        trx.setStatusPengajuan("Direview");
+        when(pinjamanTransactionRepository.findById(3)).thenReturn(Optional.of(trx));
+
+        assertThrows(IllegalArgumentException.class, () -> service.disbursePinjamanTransaction(3, "x"));
+        verify(pinjamanTransactionRepository, never()).save(any());
+        verifyNoInteractions(pushNotificationService);
+    }
+
+    @Test
+    void disburse_transaksiTidakDitemukan() {
+        loginWithRole("BACKOFFICE");
+        when(pinjamanTransactionRepository.findById(3)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> service.disbursePinjamanTransaction(3, "x"));
+    }
+
     // ---------- deletePinjamanTransaction ----------
 
     @Test

@@ -29,4 +29,21 @@ public class PinjamanTransactionServiceRequest {
         public String noteBackOffice;
         public Integer lastUpdateBy;
     }
+
+    // payload khusus tahap review oleh MARKETING: Pengajuan -> Direview
+    public static class pinjamanTransactionReviewRequest {
+        public String note;
+    }
+
+    // payload khusus tahap approval oleh BRANCH_MANAGER: Direview -> Disetujui/Ditolak
+    public static class pinjamanTransactionApprovalRequest {
+        @NotNull(message = "keputusan approval (approved) harus diisi")
+        public Boolean approved;
+        public String note;
+    }
+
+    // payload khusus tahap pencairan oleh BACKOFFICE: Disetujui -> Dicairkan
+    public static class pinjamanTransactionDisburseRequest {
+        public String note;
+    }
 }

@@ -72,6 +72,45 @@ public class PinjamanTransactionController {
         return ResponseEntity.ok(respUpdate);
     }
 
+    // tahap review oleh MARKETING: Pengajuan -> Direview
+    @PutMapping("/{id}/review")
+    public ResponseEntity<PinjamanTransactionServiceResponse.pinjamanTransactionUpdateResponse> reviewPinjamanTransaction(
+            @PathVariable Integer id,
+            @RequestBody PinjamanTransactionServiceRequest.pinjamanTransactionReviewRequest request
+    ) {
+        pinjamanTransactionService.reviewPinjamanTransaction(id, request.note);
+
+        PinjamanTransactionServiceResponse.pinjamanTransactionUpdateResponse resp = new PinjamanTransactionServiceResponse.pinjamanTransactionUpdateResponse();
+        resp.setMessage("Pengajuan berhasil direview");
+        return ResponseEntity.ok(resp);
+    }
+
+    // tahap approval oleh BRANCH_MANAGER: Direview -> Disetujui/Ditolak
+    @PutMapping("/{id}/approval")
+    public ResponseEntity<PinjamanTransactionServiceResponse.pinjamanTransactionUpdateResponse> approvalPinjamanTransaction(
+            @PathVariable Integer id,
+            @Valid @RequestBody PinjamanTransactionServiceRequest.pinjamanTransactionApprovalRequest request
+    ) {
+        pinjamanTransactionService.approvalPinjamanTransaction(id, request.approved, request.note);
+
+        PinjamanTransactionServiceResponse.pinjamanTransactionUpdateResponse resp = new PinjamanTransactionServiceResponse.pinjamanTransactionUpdateResponse();
+        resp.setMessage(request.approved ? "Pengajuan berhasil disetujui" : "Pengajuan berhasil ditolak");
+        return ResponseEntity.ok(resp);
+    }
+
+    // tahap pencairan oleh BACKOFFICE: Disetujui -> Dicairkan
+    @PutMapping("/{id}/disburse")
+    public ResponseEntity<PinjamanTransactionServiceResponse.pinjamanTransactionUpdateResponse> disbursePinjamanTransaction(
+            @PathVariable Integer id,
+            @RequestBody PinjamanTransactionServiceRequest.pinjamanTransactionDisburseRequest request
+    ) {
+        pinjamanTransactionService.disbursePinjamanTransaction(id, request.note);
+
+        PinjamanTransactionServiceResponse.pinjamanTransactionUpdateResponse resp = new PinjamanTransactionServiceResponse.pinjamanTransactionUpdateResponse();
+        resp.setMessage("Pinjaman berhasil dicairkan");
+        return ResponseEntity.ok(resp);
+    }
+
     //delete pinjaman transaction
     @DeleteMapping
     public ResponseEntity<PinjamanTransactionServiceResponse.pinjamanTransactionDeleteResponse> deletePinjamanTransaction(@RequestParam Integer Id) {
