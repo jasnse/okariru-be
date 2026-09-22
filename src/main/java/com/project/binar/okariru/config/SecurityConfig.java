@@ -107,8 +107,17 @@ public class SecurityConfig {
                         // ===== TRANSAKSI PINJAMAN =====
                         .requestMatchers(HttpMethod.POST, "/api/v1/pinjaman/transaction/**")
                             .hasAnyRole( "MARKETING", "CUSTOMER", "SUPERADMIN")
+                        // tahap kerja per role, masing-masing endpoint terpisah (bukan satu PUT generik)
+                        // supaya role lain gak bisa hit tahap yang bukan miliknya
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/pinjaman/transaction/*/review")
+                            .hasAnyRole("MARKETING", "SUPERADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/pinjaman/transaction/*/approval")
+                            .hasAnyRole("BRANCH_MANAGER", "SUPERADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/pinjaman/transaction/*/disburse")
+                            .hasAnyRole("BACKOFFICE", "SUPERADMIN")
+                        // PUT generik cuma buat koreksi data master oleh SUPERADMIN, bukan buat alur kerja staff
                         .requestMatchers(HttpMethod.PUT, "/api/v1/pinjaman/transaction/**")
-                            .hasAnyRole( "MARKETING","BRANCH_MANAGER", "BACKOFFICE", "SUPERADMIN")
+                            .hasRole("SUPERADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/pinjaman/transaction/**")
                             .hasAnyRole("MARKETING", "BRANCH_MANAGER", "BACKOFFICE", "CUSTOMER", "SUPERADMIN")
 

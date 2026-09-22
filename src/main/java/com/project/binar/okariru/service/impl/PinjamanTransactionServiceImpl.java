@@ -295,15 +295,113 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
 
         // kirim notifikasi kalau status berubah jadi Dicairkan
         if ("Dicairkan".equals(statusPengajuan) && !"Dicairkan".equals(statusSebelumnya)) {
-            String nominalFormatted = NumberFormat.getNumberInstance(new Locale("in", "ID")).format(nominalPinjaman);
-            pushNotificationService.sendToCustomer(
-                    customerId,
-                    "Pinjaman Berhasil Dicairkan",
-                    "Pengajuan pinjaman " + trxUpdate.getKodeTransaksi() + " sebesar Rp " + nominalFormatted + " telah berhasil dicairkan.",
-                    "transaction",
-                    "okariru://status-pinjaman/" + trxUpdate.getTransPinjamanId()
-            );
+            notifyDisbursed(trxUpdate);
         }
+    }
+
+    // ambil role dari JWT yang sedang aktif; null kalau principal bukan AppUser (mis. anonymous)
+    private String getCurrentRole() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!(principal instanceof AppUser appUser)) {
+            return null;
+        }
+        return appUser.getRole();
+    }
+
+    // dipakai oleh endpoint per-tahap (review/approval/disburse): SUPERADMIN selalu boleh,
+    // role lain harus persis sama dengan requiredRole
+    private void requireRole(String requiredRole, String actionLabel) {
+        String role = getCurrentRole();
+        if ("SUPERADMIN".equals(role)) {
+            return;
+        }
+        if (role == null) {
+            throw new AccessDeniedException("Sesi Invalid: Harap Login Kembali");
+        }
+        if (!requiredRole.equals(role)) {
+            throw new AccessDeniedException("Cuma role " + requiredRole + " yang boleh " + actionLabel);
+        }
+    }
+
+    // state machine sederhana: transaksi cuma boleh maju dari expectedStatus.
+    // SUPERADMIN dikecualikan supaya tetap bisa koreksi data manual.
+    private void requireStatus(PinjamanTransactionEntity trx, String expectedStatus, String actionLabel) {
+        if ("SUPERADMIN".equals(getCurrentRole())) {
+            return;
+        }
+        if (!expectedStatus.equals(trx.getStatusPengajuan())) {
+            throw new IllegalArgumentException(
+                    "Transaksi harus berstatus '" + expectedStatus + "' untuk bisa " + actionLabel +
+                            " (status saat ini: " + trx.getStatusPengajuan() + ")");
+        }
+    }
+
+    private PinjamanTransactionEntity findTrxOrThrow(Integer id) {
+        return pinjamanTransactionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("pinjaman transaction id tidak ditemukan"));
+    }
+
+    private void notifyDisbursed(PinjamanTransactionEntity trx) {
+        String nominalFormatted = NumberFormat.getNumberInstance(new Locale("in", "ID")).format(trx.getNominalPinjaman());
+        pushNotificationService.sendToCustomer(
+                trx.getCustomer().getCustomerId(),
+                "Pinjaman Berhasil Dicairkan",
+                "Pengajuan pinjaman " + trx.getKodeTransaksi() + " sebesar Rp " + nominalFormatted + " telah berhasil dicairkan.",
+                "transaction",
+                "okariru://status-pinjaman/" + trx.getTransPinjamanId()
+        );
+    }
+
+    @Override
+    @Transactional
+    public void reviewPinjamanTransaction(Integer id, String note) {
+        requireRole("MARKETING", "submit review pengajuan");
+
+        PinjamanTransactionEntity trx = findTrxOrThrow(id);
+        requireStatus(trx, "Pengajuan", "direview");
+
+        trx.setStatusPengajuan("Direview");
+        trx.setTanggalReview(LocalDate.now());
+        trx.setNoteMarketing(note);
+        trx.setLastUpdate(LocalDate.now());
+
+        pinjamanTransactionRepository.save(trx);
+    }
+
+    @Override
+    @Transactional
+    public void approvalPinjamanTransaction(Integer id, boolean approved, String note) {
+        requireRole("BRANCH_MANAGER", "approve/reject pengajuan");
+
+        PinjamanTransactionEntity trx = findTrxOrThrow(id);
+        requireStatus(trx, "Direview", "di-approve/reject");
+
+        if (approved) {
+            validateSisaPlafond(trx.getCustomer().getCustomerId(), trx.getNominalPinjaman());
+        }
+
+        trx.setStatusPengajuan(approved ? "Disetujui" : "Ditolak");
+        trx.setTanggalApproval(LocalDate.now());
+        trx.setNoteBm(note);
+        trx.setLastUpdate(LocalDate.now());
+
+        pinjamanTransactionRepository.save(trx);
+    }
+
+    @Override
+    @Transactional
+    public void disbursePinjamanTransaction(Integer id, String note) {
+        requireRole("BACKOFFICE", "cairkan pinjaman");
+
+        PinjamanTransactionEntity trx = findTrxOrThrow(id);
+        requireStatus(trx, "Disetujui", "dicairkan");
+
+        trx.setStatusPengajuan("Dicairkan");
+        trx.setNoteBackOffice(note);
+        trx.setLastUpdate(LocalDate.now());
+
+        pinjamanTransactionRepository.save(trx);
+        notifyDisbursed(trx);
     }
 
     @Override
