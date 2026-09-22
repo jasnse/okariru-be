@@ -341,6 +341,21 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
                 .orElseThrow(() -> new EntityNotFoundException("pinjaman transaction id tidak ditemukan"));
     }
 
+    private void notifyRejected(PinjamanTransactionEntity trx) {
+        String body = "Pengajuan pinjaman " + trx.getKodeTransaksi() + " tidak dapat disetujui.";
+        if (trx.getNoteBm() != null && !trx.getNoteBm().isBlank()) {
+            body += " Alasan: " + trx.getNoteBm();
+        }
+
+        pushNotificationService.sendToCustomer(
+                trx.getCustomer().getCustomerId(),
+                "Pengajuan Pinjaman Ditolak",
+                body,
+                "transaction",
+                "okariru://status-pinjaman/" + trx.getTransPinjamanId()
+        );
+    }
+
     private void notifyDisbursed(PinjamanTransactionEntity trx) {
         String nominalFormatted = NumberFormat.getNumberInstance(new Locale("in", "ID")).format(trx.getNominalPinjaman());
         pushNotificationService.sendToCustomer(
@@ -386,6 +401,10 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
         trx.setLastUpdate(LocalDate.now());
 
         pinjamanTransactionRepository.save(trx);
+
+        if (!approved) {
+            notifyRejected(trx);
+        }
     }
 
     @Override

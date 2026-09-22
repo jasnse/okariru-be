@@ -15,7 +15,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -75,10 +75,12 @@ public class DocumentServiceImpl implements DocumentService {
 
         return documentList.stream()
                 .map(doc -> {
-                    String fileUrl = ServletUriComponentsBuilder
-                            .fromCurrentContextPath()          // http://localhost:8080
-                            .path("/api/v1/document/download")  // + endpoint download
-                            .queryParam("pathfile", doc.getPathfile()) // pathfile=UUID_namaAsli.jpg
+                    // path RELATIF (bukan absolute URL dgn host/scheme) supaya FE selalu akses
+                    // lewat origin-nya sendiri (proxy/rewrite Vercel) dan gak kena mixed-content
+                    // waktu FE di-hosting HTTPS tapi backend masih HTTP di IP polos
+                    String fileUrl = UriComponentsBuilder
+                            .fromPath("/api/v1/document/download")
+                            .queryParam("pathfile", doc.getPathfile())
                             .toUriString();
 
                     return new DocumentResponse.getDocumentResponse(
