@@ -2,6 +2,7 @@ package com.project.binar.okariru.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -69,14 +70,23 @@ public class CustomerRequest {
 
     // customer buat edit profil sendiri (PUT /api/v1/customer/me) --
     public static class customerSelfUpdateRequest {
+        @NotBlank(message = "Nama harus diisi")
         public String sidName;
+        @NotBlank(message = "Alamat harus diisi")
         public String alamat;
+        @NotBlank(message = "Pekerjaan harus diisi")
         public String pekerjaan;
+        @NotNull(message = "Pendapatan harus diisi")
         public Integer pendapatan;
+        @NotBlank(message = "Status pernikahan harus diisi")
         public String maritalStatus;
+        @NotBlank(message = "No rekening harus diisi")
         public String noRekening;
+        @NotBlank(message = "Tempat lahir harus diisi")
         public String tempatLahir;
+        @NotNull(message = "Tanggal lahir harus diisi")
         public LocalDate tanggalLahir;
+        @NotBlank(message = "Gender harus diisi")
         public String gender;
     }
 
