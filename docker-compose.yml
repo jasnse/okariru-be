@@ -20,8 +20,8 @@ services:
       retries: 10
     # Tidak dibuka ke luar. Hanya bisa diakses service lain lewat network compose.
     # Kalau perlu akses dari host, aktifkan (dan pastikan hanya ke localhost):
-    # ports:
-    #   - "127.0.0.1:5432:5432"
+    ports:
+       - "5432:5432"
 
   redis:
     image: redis:7-alpine
@@ -34,6 +34,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    ports:
+      - "6379:6379"
 
   app:
     build:
