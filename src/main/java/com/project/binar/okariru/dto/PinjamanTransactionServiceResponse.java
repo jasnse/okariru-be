@@ -29,6 +29,21 @@ public class PinjamanTransactionServiceResponse {
         LocalDate lastUpdate;
         Integer lastUpdateBy;
         String jenisPinjaman;
+
+        // snapshot: data customer & pinjaman PADA SAAT pengajuan dibuat, tidak ikut berubah
+        // walau profil customer di-update atau master data pinjaman diubah admin setelahnya
+        String customerNik;
+        String customerTempatLahir;
+        LocalDate customerTanggalLahir;
+        String customerGender;
+        String customerAlamat;
+        String customerPekerjaan;
+        Integer customerPendapatan;
+        String customerMaritalStatus;
+        String customerNoRekening;
+        String deskripsiPinjaman;
+        Double bunga;
+        Double biayaLainnya;
     }
 
     @Setter

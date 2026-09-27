@@ -72,27 +72,7 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
 
         Page<PinjamanTransactionEntity> pinjamanTransPage = pinjamanTransactionRepository.searchPinjamanTrx(status, keyword, pageable);
 
-        return pinjamanTransPage.map(pinjamanTrx -> new PinjamanTransactionServiceResponse.getPinjamanTransactionResponse(
-                pinjamanTrx.getTransPinjamanId(),
-                pinjamanTrx.getKodeTransaksi(),
-                pinjamanTrx.getCustomer().getCustomerId(),
-                pinjamanTrx.getCustomer().getUserName(),
-                pinjamanTrx.getPinjaman() != null ? pinjamanTrx.getPinjaman().getPinjamanId() : null,
-                pinjamanTrx.getTanggalPengajuan(),
-                pinjamanTrx.getTanggalReview(),
-                pinjamanTrx.getTanggalApproval(),
-                pinjamanTrx.getNominalPinjaman(),
-                pinjamanTrx.getTenor(),
-                pinjamanTrx.getStatusPengajuan(),
-                pinjamanTrx.getNoteMarketing(),
-                pinjamanTrx.getNoteBm(),
-                pinjamanTrx.getNoteBackOffice(),
-                pinjamanTrx.getLastUpdate(),
-                pinjamanTrx.getLastUpdateBy() != null ? pinjamanTrx.getLastUpdateBy().getEmployeeId(): null,
-                pinjamanTrx.getPinjaman() != null ? pinjamanTrx.getPinjaman().getJenisPinjaman() : null
-
-        ));
-
+        return pinjamanTransPage.map(this::toResponse);
     }
 
     @Override
@@ -102,37 +82,31 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
         String keywordParam = (keyword == null || keyword.isBlank()) ? null : keyword;
         List<PinjamanTransactionEntity> pinjamanTransList = pinjamanTransactionRepository.findByCustomer(customerId, statusParam, keywordParam);
 
-        return pinjamanTransList.stream().map(pinjamanTrx -> new PinjamanTransactionServiceResponse.getPinjamanTransactionResponse(
-                pinjamanTrx.getTransPinjamanId(),
-                pinjamanTrx.getKodeTransaksi(),
-                pinjamanTrx.getCustomer().getCustomerId(),
-                pinjamanTrx.getCustomer().getUserName(),
-                pinjamanTrx.getPinjaman() != null ? pinjamanTrx.getPinjaman().getPinjamanId() : null,
-                pinjamanTrx.getTanggalPengajuan(),
-                pinjamanTrx.getTanggalReview(),
-                pinjamanTrx.getTanggalApproval(),
-                pinjamanTrx.getNominalPinjaman(),
-                pinjamanTrx.getTenor(),
-                pinjamanTrx.getStatusPengajuan(),
-                pinjamanTrx.getNoteMarketing(),
-                pinjamanTrx.getNoteBm(),
-                pinjamanTrx.getNoteBackOffice(),
-                pinjamanTrx.getLastUpdate(),
-                pinjamanTrx.getLastUpdateBy() != null ? pinjamanTrx.getLastUpdateBy().getEmployeeId(): null,
-                pinjamanTrx.getPinjaman() != null ? pinjamanTrx.getPinjaman().getJenisPinjaman() : null
-
-        )).toList();
+        return pinjamanTransList.stream().map(this::toResponse).toList();
     }
 
     @Override
     public PinjamanTransactionServiceResponse.getPinjamanTransactionResponse getPinjamanTransactionById(Integer id) {
         PinjamanTransactionEntity trx = pinjamanTransactionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("pinjaman transaction dengan Id " + id + " tidak ditemukan"));
+        return toResponse(trx);
+    }
+
+    // Map entity -> response. customerName/jenisPinjaman & field snapshot lain diutamakan dari kolom
+    // snapshot_* (dibekukan saat pengajuan dibuat); fallback ke data live cuma untuk transaksi lama
+    // yang dibuat sebelum kolom snapshot ini ada (snapshot-nya masih null).
+    private PinjamanTransactionServiceResponse.getPinjamanTransactionResponse toResponse(PinjamanTransactionEntity trx) {
+        String customerName = trx.getSnapshotCustomerName() != null
+                ? trx.getSnapshotCustomerName() : trx.getCustomer().getUserName();
+        String jenisPinjaman = trx.getSnapshotJenisPinjaman() != null
+                ? trx.getSnapshotJenisPinjaman()
+                : (trx.getPinjaman() != null ? trx.getPinjaman().getJenisPinjaman() : null);
+
         return new PinjamanTransactionServiceResponse.getPinjamanTransactionResponse(
                 trx.getTransPinjamanId(),
                 trx.getKodeTransaksi(),
                 trx.getCustomer().getCustomerId(),
-                trx.getCustomer().getUserName(),
+                customerName,
                 trx.getPinjaman() != null ? trx.getPinjaman().getPinjamanId() : null,
                 trx.getTanggalPengajuan(),
                 trx.getTanggalReview(),
@@ -145,7 +119,22 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
                 trx.getNoteBackOffice(),
                 trx.getLastUpdate(),
                 trx.getLastUpdateBy() != null ? trx.getLastUpdateBy().getEmployeeId() : null,
-                trx.getPinjaman() != null ? trx.getPinjaman().getJenisPinjaman() : null
+                jenisPinjaman,
+                trx.getSnapshotCustomerNik() != null ? trx.getSnapshotCustomerNik() : trx.getCustomer().getNik(),
+                trx.getSnapshotCustomerTempatLahir() != null ? trx.getSnapshotCustomerTempatLahir() : trx.getCustomer().getTempatLahir(),
+                trx.getSnapshotCustomerTanggalLahir() != null ? trx.getSnapshotCustomerTanggalLahir() : trx.getCustomer().getTanggalLahir(),
+                trx.getSnapshotCustomerGender() != null ? trx.getSnapshotCustomerGender() : trx.getCustomer().getGender(),
+                trx.getSnapshotCustomerAlamat() != null ? trx.getSnapshotCustomerAlamat() : trx.getCustomer().getAlamat(),
+                trx.getSnapshotCustomerPekerjaan() != null ? trx.getSnapshotCustomerPekerjaan() : trx.getCustomer().getPekerjaan(),
+                trx.getSnapshotCustomerPendapatan() != null ? trx.getSnapshotCustomerPendapatan() : trx.getCustomer().getPendapatan(),
+                trx.getSnapshotCustomerMaritalStatus() != null ? trx.getSnapshotCustomerMaritalStatus() : trx.getCustomer().getMaritalStatus(),
+                trx.getSnapshotCustomerNoRekening() != null ? trx.getSnapshotCustomerNoRekening() : trx.getCustomer().getNoRekening(),
+                trx.getSnapshotDeskripsiPinjaman() != null ? trx.getSnapshotDeskripsiPinjaman()
+                        : (trx.getPinjaman() != null ? trx.getPinjaman().getDeskripsiPinjaman() : null),
+                trx.getSnapshotBunga() != null ? trx.getSnapshotBunga()
+                        : (trx.getPinjaman() != null ? trx.getPinjaman().getBunga() : null),
+                trx.getSnapshotBiayaLainnya() != null ? trx.getSnapshotBiayaLainnya()
+                        : (trx.getPinjaman() != null ? trx.getPinjaman().getBiayaLainnya() : null)
         );
     }
 
@@ -164,11 +153,29 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
         trx.setTanggalPengajuan(LocalDate.now());
         trx.setStatusPengajuan("Pengajuan");
 
+        // bekukan data customer pada saat pengajuan ini dibuat
+        trx.setSnapshotCustomerName(customer.getUserName());
+        trx.setSnapshotCustomerNik(customer.getNik());
+        trx.setSnapshotCustomerTempatLahir(customer.getTempatLahir());
+        trx.setSnapshotCustomerTanggalLahir(customer.getTanggalLahir());
+        trx.setSnapshotCustomerGender(customer.getGender());
+        trx.setSnapshotCustomerAlamat(customer.getAlamat());
+        trx.setSnapshotCustomerPekerjaan(customer.getPekerjaan());
+        trx.setSnapshotCustomerPendapatan(customer.getPendapatan());
+        trx.setSnapshotCustomerMaritalStatus(customer.getMaritalStatus());
+        trx.setSnapshotCustomerNoRekening(customer.getNoRekening());
+
         if (addRequest.pinjamanId != null) {
             PinjamanEntity pinjaman = pinjamanRepository.findById(addRequest.pinjamanId)
                     .orElseThrow(() -> new EntityNotFoundException("Pinjaman dengan id " + addRequest.pinjamanId + " tidak ditemukan"));
 
             trx.setPinjaman(pinjaman);
+
+            // bekukan juga data master pinjaman pada saat ini
+            trx.setSnapshotJenisPinjaman(pinjaman.getJenisPinjaman());
+            trx.setSnapshotDeskripsiPinjaman(pinjaman.getDeskripsiPinjaman());
+            trx.setSnapshotBunga(pinjaman.getBunga());
+            trx.setSnapshotBiayaLainnya(pinjaman.getBiayaLainnya());
         }
 
         PinjamanTransactionEntity saved = pinjamanTransactionRepository.save(trx);
@@ -177,25 +184,7 @@ public class PinjamanTransactionServiceImpl implements PinjamanTransactionServic
 
         saved = pinjamanTransactionRepository.save(saved);
 
-        return new PinjamanTransactionServiceResponse.getPinjamanTransactionResponse(
-                saved.getTransPinjamanId(),
-                saved.getKodeTransaksi(),
-                saved.getCustomer().getCustomerId(),
-                saved.getCustomer().getUserName(),
-                saved.getPinjaman() != null ? saved.getPinjaman().getPinjamanId() : null,
-                saved.getTanggalPengajuan(),
-                saved.getTanggalReview(),
-                saved.getTanggalApproval(),
-                saved.getNominalPinjaman(),
-                saved.getTenor(),
-                saved.getStatusPengajuan(),
-                saved.getNoteMarketing(),
-                saved.getNoteBm(),
-                saved.getNoteBackOffice(),
-                saved.getLastUpdate(),
-                saved.getLastUpdateBy() != null ? saved.getLastUpdateBy().getEmployeeId() : null,
-                saved.getPinjaman() != null ? saved.getPinjaman().getJenisPinjaman() : null
-        );
+        return toResponse(saved);
     }
 
         //ambil role dari JWT yang sedang aktif -> untuk validasi status yang boleh proceed pinjaman

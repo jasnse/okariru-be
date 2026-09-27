@@ -64,4 +64,50 @@ public class PinjamanTransactionEntity {
     @JoinColumn(name = "last_update_by_id", referencedColumnName = "employee_id")
     private EmployeEntity lastUpdateBy;
 
+    // Snapshot data customer & pinjaman PADA SAAT pengajuan dibuat.
+    // Sengaja disalin (bukan diambil live dari relasi customer/pinjaman) supaya kalau customer
+    // update profil atau admin ubah master data pinjaman di tengah proses, data yang sudah
+    // terlanjur diajukan/direview/di-approve tidak ikut berubah.
+    @Column(name = "snapshot_customer_name")
+    private String snapshotCustomerName;
+
+    @Column(name = "snapshot_customer_nik")
+    private String snapshotCustomerNik;
+
+    @Column(name = "snapshot_customer_tempat_lahir")
+    private String snapshotCustomerTempatLahir;
+
+    @Column(name = "snapshot_customer_tanggal_lahir")
+    private LocalDate snapshotCustomerTanggalLahir;
+
+    @Column(name = "snapshot_customer_gender")
+    private String snapshotCustomerGender;
+
+    @Column(name = "snapshot_customer_alamat")
+    private String snapshotCustomerAlamat;
+
+    @Column(name = "snapshot_customer_pekerjaan")
+    private String snapshotCustomerPekerjaan;
+
+    @Column(name = "snapshot_customer_pendapatan")
+    private Integer snapshotCustomerPendapatan;
+
+    @Column(name = "snapshot_customer_marital_status")
+    private String snapshotCustomerMaritalStatus;
+
+    @Column(name = "snapshot_customer_no_rekening")
+    private String snapshotCustomerNoRekening;
+
+    @Column(name = "snapshot_jenis_pinjaman")
+    private String snapshotJenisPinjaman;
+
+    @Column(name = "snapshot_deskripsi_pinjaman")
+    private String snapshotDeskripsiPinjaman;
+
+    @Column(name = "snapshot_bunga")
+    private Double snapshotBunga;
+
+    @Column(name = "snapshot_biaya_lainnya")
+    private Double snapshotBiayaLainnya;
+
 }
