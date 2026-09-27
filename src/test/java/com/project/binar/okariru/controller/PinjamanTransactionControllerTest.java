@@ -31,7 +31,8 @@ class PinjamanTransactionControllerTest {
 
     private PinjamanTransactionServiceResponse.getPinjamanTransactionResponse trx() {
         return new PinjamanTransactionServiceResponse.getPinjamanTransactionResponse(3, "TRX-2026-00003", 7, "andi", 1,
-                null, null, null, 5_000_000, 12, "Pengajuan", null, null, null, null, null, "KTA");
+                null, null, null, 5_000_000, 12, "Pengajuan", null, null, null, null, null, "KTA",
+                null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     @Test
